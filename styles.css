@@ -580,23 +580,7 @@ header {
     background: #1e3d1a;
 }
 
-/* Auth Modal - Additional CSS */
-.auth-form-container {
-    display: none;
-}
-
-.auth-form-container.active {
-    display: block;
-}
-
-.auth-form-container h3 {
-    color: #2d5a27;
-    margin-bottom: 25px;
-    font-size: 24px;
-    text-align: center;
-}
-
-/* Make sure modal is above everything */
+/* Auth Modal */
 .auth-modal {
     position: fixed;
     top: 0;
@@ -650,6 +634,49 @@ header {
     color: #fff;
 }
 
+/* Auth Form Containers */
+.auth-form-container {
+    display: none;
+}
+
+.auth-form-container.active {
+    display: block;
+}
+
+.auth-form-container h3 {
+    color: #2d5a27;
+    margin-bottom: 25px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.auth-form-container .form-group {
+    margin-bottom: 18px;
+}
+
+.auth-form-container .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.auth-form-container .form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.auth-form-container .form-group input:focus {
+    outline: none;
+    border-color: #2d5a27;
+}
+
 .auth-submit {
     width: 100%;
     padding: 14px;
@@ -668,34 +695,6 @@ header {
     background: #1e3d1a;
 }
 
-.auth-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Toast notification */
-.toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #2d5a27;
-    color: #fff;
-    padding: 15px 30px;
-    border-radius: 10px;
-    z-index: 999999;
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    font-weight: 500;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    max-width: 90%;
-    text-align: center;
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
 /* Toast Notification */
 .toast {
     position: fixed;
@@ -706,7 +705,7 @@ header {
     color: #fff;
     padding: 15px 30px;
     border-radius: 10px;
-    z-index: 1002;
+    z-index: 999999;
     opacity: 0;
     transition: opacity 0.3s, transform 0.3s;
     font-weight: 500;
