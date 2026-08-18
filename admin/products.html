@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products - Admin Panel</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <i class="fas fa-leaf"></i>
+                <span>Pinaki Farms Admin</span>
+            </div>
+            <div class="admin-header-right">
+                <span id="adminName">Admin</span>
+                <button onclick="logoutAdmin()" class="admin-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Body -->
+    <div class="admin-body">
+        <div class="admin-container">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <nav class="admin-nav">
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="products.html" class="active">
+                        <i class="fas fa-box"></i> Products
+                    </a>
+                    <a href="orders.html">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </a>
+                    <a href="customers.html">
+                        <i class="fas fa-users"></i> Customers
+                    </a>
+                    <a href="reviews.html">
+                        <i class="fas fa-star"></i> Reviews
+                    </a>
+                    <a href="../index.html">
+                        <i class="fas fa-store"></i> View Website
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="admin-main">
+                <div class="admin-section-header">
+                    <h2><i class="fas fa-box"></i> Manage Products</h2>
+                    <button class="admin-add-btn" onclick="openAddProduct()">
+                        <i class="fas fa-plus"></i> Add New Product
+                    </button>
+                </div>
+
+                <!-- Product Table -->
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Original</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productList">
+                            <tr><td colspan="7" style="text-align:center;padding:40px;">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div class="admin-modal" id="productModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3 id="modalTitle">Add Product</h3>
+                <button class="admin-modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Name *</label>
+                        <input type="text" id="pName" placeholder="e.g. Pure Desi Ghee" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="pCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="ghee">Pure Ghee</option>
+                            <option value="oil">Cold Pressed Oils</option>
+                            <option value="achar">Homemade Pickles</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (₹) *</label>
+                        <input type="number" id="pPrice" placeholder="450" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price (₹)</label>
+                        <input type="number" id="pOriginalPrice" placeholder="550" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Emoji</label>
+                        <input type="text" id="pEmoji" placeholder="🧈" />
+                    </div>
+                    <div class="form-group">
+                        <label>Unit</label>
+                        <input type="text" id="pUnit" placeholder="500ml" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Purity Badge</label>
+                        <input type="text" id="pPurity" placeholder="100% Pure A2" />
+                    </div>
+                    <div class="form-group">
+                        <label>In Stock</label>
+                        <select id="pInStock">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="pDescription" rows="3" placeholder="Product description..."></textarea>
+                </div>
+
+                <div class="admin-modal-actions">
+                    <button type="submit" class="admin-save-btn">
+                        <i class="fas fa-save"></i> Save Product
+                    </button>
+                    <button type="button" class="admin-cancel-btn" onclick="closeProductModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../js/admin-script.js"></script>
+</body>
+</html>
