@@ -134,7 +134,7 @@
     </div>
 
     <script type="module">
-        // ============ IMPORTS ============
+        // ============ IMPORTS - ALL FIREBASE FUNCTIONS ============
         import { 
             auth, 
             signInWithEmailAndPassword, 
@@ -173,7 +173,6 @@
                     } else {
                         console.log('❌ Not admin, logging out...');
                         await signOut(auth);
-                        // Refresh page after logout
                         window.location.reload();
                     }
                 } catch (error) {
