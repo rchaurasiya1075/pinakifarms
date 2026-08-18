@@ -4,81 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Pinaki Farms</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="admin-login-container">
         <div class="admin-login-box">
             <div class="admin-login-header">
-                <i class="fas fa-leaf"></i>
-                <h2>Pinaki Farms</h2>
-                <p>Admin Panel</p>
+                <i class="fas fa-user-shield"></i>
+                <h2>Admin Panel</h2>
+                <p>Pinaki Farms</p>
             </div>
             
-            <div id="loginError" class="login-error" style="display:none;"></div>
-            
-            <form id="adminLoginForm">
+            <form id="adminLoginForm" onsubmit="return adminLogin(event)">
                 <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <label>Email Address</label>
                     <input type="email" id="adminEmail" placeholder="admin@pinakifarms.com" required />
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-lock"></i> Password</label>
+                    <label>Password</label>
                     <input type="password" id="adminPassword" placeholder="Enter your password" required />
                 </div>
                 <button type="submit" class="admin-login-btn">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
-                <p class="back-link">
-                    <a href="../index.html"><i class="fas fa-arrow-left"></i> Back to Website</a>
+                <p style="text-align:center;margin-top:15px;">
+                    <a href="index.html" style="color:#2d5a27;">← Back to Website</a>
                 </p>
             </form>
+            
+            <div id="adminLoginError" style="display:none;color:#e74c3c;text-align:center;margin-top:10px;"></div>
         </div>
     </div>
 
     <script type="module">
-        import { auth, signInWithEmailAndPassword, onAuthStateChanged } from '../firebase-config.js';
+        import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
 
-        // Check if already logged in
+        // Check if already logged in as admin
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    const { db, collection, query, where, getDocs } = await import('../firebase-config.js');
+                    // Check if user is admin
+                    const { db, collection, query, where, getDocs } = await import('./firebase-config.js');
                     const q = query(collection(db, 'admins'), where('email', '==', user.email));
                     const querySnapshot = await getDocs(q);
+                    
                     if (!querySnapshot.empty) {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = 'admin-panel.html';
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error checking admin:', error);
                 }
             }
         });
 
-        // Handle Login
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        window.adminLogin = async function(event) {
+            event.preventDefault();
             
             const email = document.getElementById('adminEmail').value.trim();
             const password = document.getElementById('adminPassword').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            errorDiv.style.display = 'none';
+            const errorDiv = document.getElementById('adminLoginError');
             
             if (!email || !password) {
                 errorDiv.textContent = '⚠️ Please fill all fields';
                 errorDiv.style.display = 'block';
-                return;
+                return false;
             }
             
             try {
-                // Sign in with Firebase
+                errorDiv.style.display = 'none';
+                
+                // Sign in with Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
-                // Check if admin
-                const { db, collection, query, where, getDocs } = await import('../firebase-config.js');
+                // Check if user is admin
+                const { db, collection, query, where, getDocs } = await import('./firebase-config.js');
                 const q = query(collection(db, 'admins'), where('email', '==', user.email));
                 const querySnapshot = await getDocs(q);
                 
@@ -86,13 +88,15 @@
                     errorDiv.textContent = '❌ You are not authorized as admin';
                     errorDiv.style.display = 'block';
                     await signOut(auth);
-                    return;
+                    return false;
                 }
                 
-                // Redirect to dashboard
-                window.location.href = 'dashboard.html';
+                // Redirect to admin panel
+                window.location.href = 'admin-panel.html';
+                return false;
                 
             } catch (error) {
+                console.error('Admin login error:', error);
                 let errorMsg = '❌ Login failed. ';
                 switch(error.code) {
                     case 'auth/user-not-found': errorMsg += 'Admin account not found.';
@@ -103,8 +107,9 @@
                 }
                 errorDiv.textContent = errorMsg;
                 errorDiv.style.display = 'block';
+                return false;
             }
-        });
+        };
     </script>
 </body>
 </html>
