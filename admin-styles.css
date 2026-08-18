@@ -375,4 +375,65 @@
     padding: 12px;
     background: #2d5a27;
     color: #fff;
-    border:
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.admin-save-btn:hover {
+    background: #1e3d1a;
+}
+
+.admin-cancel-btn {
+    flex: 1;
+    padding: 12px;
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.admin-cancel-btn:hover {
+    background: #e0e0e0;
+}
+
+/* ============= RESPONSIVE ============= */
+@media (max-width: 1024px) {
+    .admin-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-sidebar {
+        position: static;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .admin-nav a {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .admin-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-login-box {
+        padding: 30px 20px;
+    }
+}
