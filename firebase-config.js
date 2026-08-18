@@ -21,7 +21,10 @@ import {
     query,
     where,
     onSnapshot,
-    getDoc
+    getDoc,
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -38,6 +41,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+// ============ FIRESTORE WITH OFFLINE PERSISTENCE ============
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
+
 // Auth Exports
 export const auth = getAuth(app);
 export { 
@@ -51,8 +61,8 @@ export {
 };
 
 // Firestore Exports
-export const db = getFirestore(app);
 export { 
+    db,
     collection,
     addDoc,
     getDocs,
