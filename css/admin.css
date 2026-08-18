@@ -1,6 +1,4 @@
 /* admin.css - Complete Admin Styling */
-
-/* ============= RESET ============= */
 * {
     margin: 0;
     padding: 0;
@@ -13,89 +11,7 @@ body {
     color: #333;
 }
 
-/* ============= ADMIN LOGIN ============= */
-.admin-login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1a3a16, #2d5a27);
-    padding: 20px;
-}
-
-.admin-login-box {
-    background: #fff;
-    padding: 40px;
-    border-radius: 16px;
-    width: 420px;
-    max-width: 100%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-
-.admin-login-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.admin-login-header i {
-    font-size: 50px;
-    color: #2d5a27;
-}
-
-.admin-login-header h2 {
-    color: #333;
-    font-size: 24px;
-    margin-top: 10px;
-}
-
-.admin-login-header p {
-    color: #666;
-    font-size: 14px;
-}
-
-.login-error {
-    background: #fee;
-    color: #e74c3c;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    text-align: center;
-}
-
-.admin-login-btn {
-    width: 100%;
-    padding: 14px;
-    background: #2d5a27;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.admin-login-btn:hover {
-    background: #1a3a16;
-}
-
-.back-link {
-    text-align: center;
-    margin-top: 15px;
-}
-
-.back-link a {
-    color: #2d5a27;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.back-link a:hover {
-    text-decoration: underline;
-}
-
-/* ============= ADMIN HEADER ============= */
+/* Admin Header */
 .admin-header {
     background: #1a3a16;
     color: #fff;
@@ -148,7 +64,7 @@ body {
     background: rgba(255,255,255,0.25);
 }
 
-/* ============= ADMIN BODY ============= */
+/* Admin Body */
 .admin-body {
     min-height: calc(100vh - 70px);
     padding: 20px;
@@ -162,7 +78,7 @@ body {
     gap: 25px;
 }
 
-/* ============= ADMIN SIDEBAR ============= */
+/* Admin Sidebar */
 .admin-sidebar {
     background: #fff;
     border-radius: 12px;
@@ -206,7 +122,7 @@ body {
     color: #fff;
 }
 
-/* ============= ADMIN MAIN ============= */
+/* Admin Main */
 .admin-main {
     background: #fff;
     border-radius: 12px;
@@ -247,7 +163,7 @@ body {
     background: #1a3a16;
 }
 
-/* ============= STATS ============= */
+/* Stats */
 .admin-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -287,7 +203,7 @@ body {
     font-size: 14px;
 }
 
-/* ============= QUICK ACTIONS ============= */
+/* Quick Actions */
 .quick-actions {
     margin-bottom: 30px;
 }
@@ -336,7 +252,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* ============= TABLES ============= */
+/* Tables */
 .admin-table-wrapper {
     overflow-x: auto;
 }
@@ -422,7 +338,7 @@ body {
     font-size: 13px;
 }
 
-/* ============= MODAL ============= */
+/* Modal */
 .admin-modal {
     display: none;
     position: fixed;
@@ -476,7 +392,7 @@ body {
     color: #333;
 }
 
-/* ============= FORM ============= */
+/* Form */
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -558,7 +474,7 @@ body {
     background: #dee2e6;
 }
 
-/* ============= TOAST ============= */
+/* Toast */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -581,7 +497,7 @@ body {
     opacity: 1;
 }
 
-/* ============= RESPONSIVE ============= */
+/* Responsive */
 @media (max-width: 1024px) {
     .admin-container {
         grid-template-columns: 1fr;
