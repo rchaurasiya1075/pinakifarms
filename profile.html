@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings - Pinaki Farms</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>Pinaki Farms</span>
+                </a>
+                <span class="dashboard-title">| Profile Settings</span>
+            </div>
+            <div class="header-right">
+                <span class="user-welcome" id="userWelcome">Welcome, User!</span>
+                <button onclick="logoutUser()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Sidebar -->
+                <aside class="dashboard-sidebar">
+                    <div class="user-profile-card">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3 id="userName">User Name</h3>
+                        <p id="userEmail">user@email.com</p>
+                        <span class="user-role">Customer</span>
+                    </div>
+                    
+                    <nav class="dashboard-nav">
+                        <a href="dashboard.html">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <a href="order-history.html">
+                            <i class="fas fa-shopping-bag"></i> Order History
+                        </a>
+                        <a href="payment-history.html">
+                            <i class="fas fa-credit-card"></i> Payment History
+                        </a>
+                        <a href="profile.html" class="active">
+                            <i class="fas fa-user-cog"></i> Profile Settings
+                        </a>
+                        <a href="index.html">
+                            <i class="fas fa-store"></i> Continue Shopping
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="dashboard-main">
+                    <div class="page-header">
+                        <h2><i class="fas fa-user-cog"></i> Profile Settings</h2>
+                    </div>
+
+                    <div class="profile-form-wrapper">
+                        <form id="profileForm" onsubmit="updateProfile(event)">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="profileName" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="profileEmail" disabled />
+                                <small>Email cannot be changed</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="profilePhone" />
+                            </div>
+                            <div class="form-group">
+                                <label>Delivery Address</label>
+                                <textarea id="profileAddress" rows="3" placeholder="Enter your full delivery address"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Pincode</label>
+                                <input type="text" id="profilePincode" />
+                            </div>
+                            <button type="submit" class="save-btn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button type="button" class="reset-btn" onclick="loadProfile()">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Change Password Section -->
+                    <div class="change-password-section">
+                        <h3><i class="fas fa-lock"></i> Change Password</h3>
+                        <form id="passwordForm" onsubmit="changePassword(event)">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" id="currentPassword" required />
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" id="newPassword" required minlength="6" />
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" id="confirmPassword" required />
+                            </div>
+                            <button type="submit" class="save-btn">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                        </form>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="dashboard-script.js"></script>
+</body>
+</html>
