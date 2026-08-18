@@ -44,7 +44,8 @@
                 <button class="auth-toggle" onclick="toggleAuth()">
                     <i class="fas fa-user"></i>
                 </button>
-                <button class="admin-link" onclick="window.location.href='admin-login.html'" title="Admin Panel">
+                <!-- ✅ Admin Link - Sahi Path -->
+                <button class="admin-link" onclick="window.location.href='admin/login.html'" title="Admin Panel">
                     <i class="fas fa-user-shield"></i>
                 </button>
             </div>
@@ -165,6 +166,7 @@
                 <i class="fas fa-leaf"></i> Welcome to Pinaki Farms
             </h2>
             
+            <!-- Login Form -->
             <div id="loginFormContainer" class="auth-form-container active">
                 <form id="loginForm" onsubmit="return handleLogin(event)">
                     <h3>Login to Your Account</h3>
@@ -184,6 +186,7 @@
                 </form>
             </div>
             
+            <!-- Signup Form -->
             <div id="signupFormContainer" class="auth-form-container">
                 <form id="signupForm" onsubmit="return handleSignup(event)">
                     <h3>Create New Account</h3>
@@ -226,6 +229,7 @@
                     <a href="#home">Home</a>
                     <a href="#products">Products</a>
                     <a href="#story">Our Story</a>
+                    <a href="admin/login.html">Admin Panel</a>
                 </div>
                 <div class="footer-section">
                     <h4>Follow Us</h4>
@@ -247,7 +251,12 @@
         <button onclick="scrollToSection('home')"><i class="fas fa-home"></i><span>Home</span></button>
         <button onclick="scrollToSection('products')"><i class="fas fa-store"></i><span>Shop</span></button>
         <button onclick="toggleCart()"><i class="fas fa-shopping-cart"></i><span>Cart</span></button>
-        <button onclick="window.location.href='dashboard.html'"><i class="fas fa-user"></i><span>Account</span></button>
+        <button onclick="window.location.href='admin/login.html'">
+            <i class="fas fa-user-shield"></i><span>Admin</span>
+        </button>
+        <button onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-user"></i><span>Account</span>
+        </button>
     </div>
 
     <script type="module" src="script.js"></script>
