@@ -1,4 +1,4 @@
-// script.js - COMPLETE FIXED
+// script.js - TOP PART FIXED
 import { 
     db, auth,
     collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot,
@@ -28,6 +28,9 @@ const authModal = document.getElementById('authModal');
 const searchBar = document.getElementById('searchBar');
 const searchInput = document.getElementById('searchInput');
 
+console.log('✅ DOM elements loaded');
+console.log('Auth Modal:', authModal);
+
 // ============= INIT =============
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM fully loaded');
@@ -38,18 +41,22 @@ document.addEventListener('DOMContentLoaded', function() {
     loadReviews();
 });
 
-// ============= AUTH FUNCTIONS =============
+// ============= AUTH FUNCTIONS - FIXED =============
 
-// Toggle Auth Modal
+// Toggle Auth Modal - FIXED
 window.toggleAuth = function() {
     console.log('🔑 Toggle auth called');
     if (authModal) {
         authModal.classList.toggle('active');
         document.body.style.overflow = authModal.classList.contains('active') ? 'hidden' : 'auto';
+        console.log('Auth modal active:', authModal.classList.contains('active'));
+    } else {
+        console.error('❌ Auth modal not found!');
+        alert('Auth modal not found! Please refresh the page.');
     }
 }
 
-// Close Auth Modal
+// Close Auth Modal - FIXED
 window.closeAuthModal = function() {
     console.log('❌ Close auth called');
     if (authModal) {
@@ -58,21 +65,33 @@ window.closeAuthModal = function() {
     }
 }
 
-// Show Signup Form
+// Show Signup Form - FIXED
 window.showSignupForm = function() {
     console.log('📝 Show signup form');
-    document.getElementById('loginFormContainer').classList.remove('active');
-    document.getElementById('signupFormContainer').classList.add('active');
+    const loginContainer = document.getElementById('loginFormContainer');
+    const signupContainer = document.getElementById('signupFormContainer');
+    if (loginContainer && signupContainer) {
+        loginContainer.classList.remove('active');
+        signupContainer.classList.add('active');
+    } else {
+        console.error('❌ Form containers not found!');
+    }
 }
 
-// Show Login Form
+// Show Login Form - FIXED
 window.showLoginForm = function() {
     console.log('🔐 Show login form');
-    document.getElementById('signupFormContainer').classList.remove('active');
-    document.getElementById('loginFormContainer').classList.add('active');
+    const loginContainer = document.getElementById('loginFormContainer');
+    const signupContainer = document.getElementById('signupFormContainer');
+    if (loginContainer && signupContainer) {
+        signupContainer.classList.remove('active');
+        loginContainer.classList.add('active');
+    } else {
+        console.error('❌ Form containers not found!');
+    }
 }
 
-// ============= HANDLE LOGIN =============
+// ============= HANDLE LOGIN - FIXED =============
 window.handleLogin = async function(event) {
     event.preventDefault();
     console.log('🔑 Login form submitted');
@@ -121,7 +140,7 @@ window.handleLogin = async function(event) {
     }
 }
 
-// ============= HANDLE SIGNUP =============
+// ============= HANDLE SIGNUP - FIXED =============
 window.handleSignup = async function(event) {
     event.preventDefault();
     console.log('📝 Signup form submitted');
