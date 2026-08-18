@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Admin Header -->
     <header class="admin-header">
         <div class="admin-header-content">
             <div class="admin-logo">
@@ -24,10 +23,8 @@
         </div>
     </header>
 
-    <!-- Admin Body -->
     <div class="admin-body">
         <div class="admin-container">
-            <!-- Sidebar -->
             <aside class="admin-sidebar">
                 <nav class="admin-nav">
                     <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
@@ -39,7 +36,6 @@
                 </nav>
             </aside>
 
-            <!-- Main Content -->
             <main class="admin-main">
                 <div class="admin-section-header">
                     <h2><i class="fas fa-box"></i> Manage Products</h2>
@@ -71,7 +67,7 @@
 
     <!-- Add/Edit Product Modal -->
     <div class="admin-modal" id="productModal">
-        <div class="admin-modal-content" style="width:700px;max-width:95%;">
+        <div class="admin-modal-content" style="width:750px;max-width:95%;">
             <div class="admin-modal-header">
                 <h3 id="modalTitle">Add Product</h3>
                 <button class="admin-modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
@@ -138,30 +134,35 @@
                     </div>
                 </div>
 
-                <!-- ============ MULTIPLE IMAGES ============ -->
+                <!-- ============ IMAGE UPLOAD SECTION ============ -->
                 <div class="form-group">
-                    <label><i class="fas fa-images"></i> Product Images (Google Drive URLs)</label>
-                    <div id="imageFields">
-                        <div class="image-input-row" style="display:flex;gap:10px;margin-bottom:8px;">
-                            <input type="url" class="pImage" placeholder="Image 1: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
-                            <button type="button" onclick="addImageField()" style="background:#2d5a27;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
+                    <label><i class="fas fa-images"></i> Product Images (Upload Multiple)</label>
+                    <div style="border:2px dashed #c49b2c;border-radius:10px;padding:20px;text-align:center;background:#fdf8f0;margin-bottom:10px;" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:40px;color:#c49b2c;"></i>
+                        <p style="color:#666;margin:10px 0;">Drag & drop images here or click to browse</p>
+                        <input type="file" id="imageUpload" multiple accept="image/*" style="display:none;" onchange="uploadImages()" />
+                        <button type="button" onclick="document.getElementById('imageUpload').click()" class="admin-add-btn" style="margin:0 auto;">
+                            <i class="fas fa-plus"></i> Select Images
+                        </button>
                     </div>
+                    <div id="imagePreviewContainer" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;"></div>
                     <small style="color:#999;display:block;margin-top:4px;">
-                        📸 Google Drive: Upload image → Share → "Anyone with link" → Use format: 
-                        <code>https://drive.google.com/uc?export=view&id=IMAGE_ID</code>
+                        📸 Select multiple images at once. All images will be uploaded to Firebase Storage.
                     </small>
                 </div>
 
-                <!-- ============ YOUTUBE VIDEO ============ -->
+                <!-- ============ VIDEO UPLOAD SECTION ============ -->
                 <div class="form-group">
-                    <label><i class="fab fa-youtube"></i> YouTube Video URL</label>
-                    <input type="url" id="pVideo" placeholder="https://www.youtube.com/embed/VIDEO_ID" />
+                    <label><i class="fas fa-video"></i> Product Video (Upload)</label>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <input type="file" id="videoUpload" accept="video/*" style="flex:1;padding:10px;border:2px solid #e0d5c8;border-radius:8px;" onchange="uploadVideo()" />
+                        <button type="button" onclick="document.getElementById('videoUpload').click()" class="admin-add-btn" style="padding:10px 20px;">
+                            <i class="fas fa-upload"></i> Upload Video
+                        </button>
+                    </div>
+                    <div id="videoPreviewContainer" style="margin-top:10px;"></div>
                     <small style="color:#999;display:block;margin-top:4px;">
-                        🎥 YouTube: Upload video → Share → Embed → Use: 
-                        <code>https://www.youtube.com/embed/VIDEO_ID</code>
+                        🎥 Upload video file (MP4, WebM, etc.). Will be stored in Firebase Storage.
                     </small>
                 </div>
 
@@ -180,6 +181,15 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Upload Progress -->
+    <div id="uploadProgress" style="display:none;position:fixed;bottom:20px;right:20px;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:99999;min-width:250px;">
+        <h4 style="color:#1a4d2e;margin-bottom:10px;"><i class="fas fa-spinner fa-spin"></i> Uploading...</h4>
+        <div style="background:#f0e8e0;height:8px;border-radius:4px;overflow:hidden;">
+            <div id="progressBar" style="background:#c49b2c;height:100%;width:0%;transition:width 0.3s;"></div>
+        </div>
+        <p id="progressText" style="font-size:12px;color:#999;margin-top:5px;">0%</p>
     </div>
 
     <script type="module" src="../js/admin-script.js"></script>
