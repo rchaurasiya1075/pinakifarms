@@ -17,7 +17,20 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Export all services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const database = getDatabase(app);
-export const analytics = getAnalytics(app);
+
+// Analytics - Conditional export (only if available)
+let analytics = null;
+try {
+  analytics = getAnalytics(app);
+} catch (error) {
+  console.warn('Analytics not available:', error.message);
+}
+export { analytics };
+
+// Also export app if needed
+export { app };
