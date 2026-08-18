@@ -1,7 +1,28 @@
 // firebase-config.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    onSnapshot,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -17,7 +38,33 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+// ============ AUTH EXPORTS ============
 export const auth = getAuth(app);
+export { 
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider
+};
+
+// ============ FIRESTORE EXPORTS ============
 export const db = getFirestore(app);
+export { 
+    collection,
+    addDoc,
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    onSnapshot,
+    getDoc
+};
+
+// ============ DATABASE EXPORTS ============
 export const database = getDatabase(app);
 export { app };
