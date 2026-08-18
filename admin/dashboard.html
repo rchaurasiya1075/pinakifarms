@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Panel</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <i class="fas fa-leaf"></i>
+                <span>Pinaki Farms Admin</span>
+            </div>
+            <div class="admin-header-right">
+                <span id="adminName">Admin</span>
+                <button onclick="logoutAdmin()" class="admin-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Body -->
+    <div class="admin-body">
+        <div class="admin-container">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <nav class="admin-nav">
+                    <a href="dashboard.html" class="active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="products.html">
+                        <i class="fas fa-box"></i> Products
+                    </a>
+                    <a href="orders.html">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </a>
+                    <a href="customers.html">
+                        <i class="fas fa-users"></i> Customers
+                    </a>
+                    <a href="reviews.html">
+                        <i class="fas fa-star"></i> Reviews
+                    </a>
+                    <a href="../index.html">
+                        <i class="fas fa-store"></i> View Website
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="admin-main">
+                <h2><i class="fas fa-home"></i> Dashboard Overview</h2>
+                
+                <!-- Stats -->
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-box"></i></div>
+                        <div class="stat-info">
+                            <h3 id="totalProducts">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                        <div class="stat-info">
+                            <h3 id="totalOrders">0</h3>
+                            <p>Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3 id="totalCustomers">0</h3>
+                            <p>Total Customers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+                        <div class="stat-info">
+                            <h3 id="totalRevenue">₹0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <a href="products.html" class="action-btn primary">
+                            <i class="fas fa-plus"></i> Add Product
+                        </a>
+                        <a href="orders.html" class="action-btn secondary">
+                            <i class="fas fa-eye"></i> View Orders
+                        </a>
+                        <a href="../index.html" class="action-btn secondary">
+                            <i class="fas fa-store"></i> View Website
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="recent-orders">
+                    <h3>Recent Orders</h3>
+                    <div id="recentOrdersList">
+                        <p style="text-align:center;color:#999;padding:20px;">Loading orders...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="../js/admin-script.js"></script>
+</body>
+</html>
