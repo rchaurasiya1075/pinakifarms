@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Pinaki Farms</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <h2><i class="fas fa-leaf"></i> Pinaki Admin</h2>
+            <nav>
+                <a href="#dashboard" class="active"><i class="fas fa-dashboard"></i> Dashboard</a>
+                <a href="#products"><i class="fas fa-box"></i> Products</a>
+                <a href="#orders"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="#customers"><i class="fas fa-users"></i> Customers</a>
+                <a href="#reviews"><i class="fas fa-star"></i> Reviews</a>
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <!-- Products Management -->
+            <section id="products" class="admin-section active">
+                <div class="admin-header">
+                    <h2>Manage Products</h2>
+                    <button class="btn-primary" onclick="showAddProduct()">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+                
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Emoji</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductList"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Add/Edit Product Modal -->
+            <div class="modal" id="productModal">
+                <div class="modal-content">
+                    <h3 id="modalTitle">Add Product</h3>
+                    <form id="productForm" onsubmit="saveProduct(event)">
+                        <input type="hidden" id="productId">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input type="text" id="pName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="pCategory" required>
+                                <option value="vegetables">Vegetables</option>
+                                <option value="fruits">Fruits</option>
+                                <option value="grains">Grains</option>
+                                <option value="dairy">Dairy</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price (₹)</label>
+                            <input type="number" id="pPrice" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Original Price (₹)</label>
+                            <input type="number" id="pOriginalPrice">
+                        </div>
+                        <div class="form-group">
+                            <label>Emoji</label>
+                            <input type="text" id="pEmoji" placeholder="🍅">
+                        </div>
+                        <div class="form-group">
+                            <label>Purity Badge</label>
+                            <input type="text" id="pPurity" placeholder="100% Organic">
+                        </div>
+                        <div class="form-group">
+                            <label>Unit</label>
+                            <input type="text" id="pUnit" placeholder="kg">
+                        </div>
+                        <div class="form-group">
+                            <label>In Stock</label>
+                            <select id="pInStock">
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save</button>
+                            <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onAuthStateChanged, signOut } from './firebase-config.js';
+
+        let currentUser = null;
+
+        // Auth Check
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Check if user is admin
+                const adminCheck = await getDocs(collection(db, 'admins'));
+                let isAdmin = false;
+                adminCheck.forEach(doc => {
+                    if (doc.data().email === user.email) {
+                        isAdmin = true;
+                    }
+                });
+                
+                if (isAdmin) {
+                    currentUser = user;
+                    loadProducts();
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Load Products
+        async function loadProducts() {
+            const list = document.getElementById('adminProductList');
+            list.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, 'products'));
+                const products = [];
+                querySnapshot.forEach(doc => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (products.length === 0) {
+                    list.innerHTML = '<tr><td colspan="6">No products found. Add your first product!</td></tr>';
+                    return;
+                }
+                
+                list.innerHTML = products.map(p => `
+                    <tr>
+                        <td>${p.emoji || '🌿'}</td>
+                        <td>${p.name}</td>
+                        <td>${p.category}</td>
+                        <td>₹${p.price}</td>
+                        <td>${p.inStock ? '✅ In Stock' : '❌ Out of Stock'}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editProduct('${p.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteProduct('${p.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = `<tr><td colspan="6">Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Show Add Product Modal
+        window.showAddProduct = function() {
+            document.getElementById('modalTitle').textContent = 'Add Product';
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        // Edit Product
+        window.editProduct = async function(id) {
+            try {
+                const docRef = doc(db, 'products', id);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('modalTitle').textContent = 'Edit Product';
+                    document.getElementById('productId').value = id;
+                    document.getElementById('pName').value = data.name;
+                    document.getElementById('pCategory').value = data.category;
+                    document.getElementById('pPrice').value = data.price;
+                    document.getElementById('pOriginalPrice').value = data.originalPrice || '';
+                    document.getElementById('pEmoji').value = data.emoji || '';
+                    document.getElementById('pPurity').value = data.purity || '';
+                    document.getElementById('pUnit').value = data.unit || '';
+                    document.getElementById('pInStock').value = data.inStock ? 'true' : 'false';
+                    document.getElementById('productModal').style.display = 'flex';
+                }
+            } catch (error) {
+                alert('Error loading product: ' + error.message);
+            }
+        }
+
+        // Save Product
+        window.saveProduct = async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('productId').value;
+            const data = {
+                name: document.getElementById('pName').value,
+                category: document.getElementById('pCategory').value,
+                price: parseFloat(document.getElementById('pPrice').value),
+                originalPrice: parseFloat(document.getElementById('pOriginalPrice').value) || 0,
+                emoji: document.getElementById('pEmoji').value || '🌿',
+                purity: document.getElementById('pPurity').value || 'Pure',
+                unit: document.getElementById('pUnit').value || 'kg',
+                inStock: document.getElementById('pInStock').value === 'true'
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'products', id), data);
+                    alert('Product updated successfully!');
+                } else {
+                    await addDoc(collection(db, 'products'), data);
+                    alert('Product added successfully!');
+                }
+                closeModal();
+                loadProducts();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Delete Product
+        window.deleteProduct = async function(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    await deleteDoc(doc(db, 'products', id));
+                    alert('Product deleted successfully!');
+                    loadProducts();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            }
+        }
+
+        // Close Modal
+        window.closeModal = function() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        // Logout
+        window.logout = async function() {
+            if (confirm('Are you sure you want to logout?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Make functions global
+        window.loadProducts = loadProducts;
+        window.editProduct = editProduct;
+        window.deleteProduct = deleteProduct;
+        window.saveProduct = saveProduct;
+        window.closeModal = closeModal;
+    </script>
+</body>
+</html>
