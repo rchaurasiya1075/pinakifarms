@@ -38,7 +38,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Auth Exports
+// ============ AUTH EXPORTS ============
 export const auth = getAuth(app);
 export { 
     signInWithEmailAndPassword,
@@ -50,7 +50,7 @@ export {
     EmailAuthProvider
 };
 
-// Firestore Exports
+// ============ FIRESTORE EXPORTS ============
 export const db = getFirestore(app);
 export { 
     collection,
@@ -65,6 +65,6 @@ export {
     getDoc
 };
 
-// Database Exports
+// ============ DATABASE EXPORTS ============
 export const database = getDatabase(app);
 export { app };
