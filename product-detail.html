@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Pinaki Farms</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Product Detail Page Styles */
+        .product-detail-container {
+            padding: 40px 0;
+            background: #fdf8f0;
+            min-height: calc(100vh - 300px);
+        }
+
+        .product-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0e8e0;
+        }
+
+        .product-detail-image {
+            position: relative;
+        }
+
+        .product-detail-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #c49b2c;
+        }
+
+        .product-detail-image .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #b22222;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .product-detail-info h1 {
+            font-size: 32px;
+            color: #1a4d2e;
+            margin-bottom: 5px;
+        }
+
+        .product-detail-info .category-tag {
+            display: inline-block;
+            background: #c49b2c;
+            color: #fff;
+            padding: 3px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .product-detail-info .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a4d2e;
+        }
+
+        .product-detail-info .original-price {
+            font-size: 18px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 15px;
+        }
+
+        .product-detail-info .purity-badge {
+            display: inline-block;
+            background: #1a4d2e;
+            color: #c49b2c;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-detail-info .description {
+            margin: 20px 0;
+            color: #3d2b1f;
+            line-height: 1.8;
+        }
+
+        .product-detail-info .specs {
+            background: #fdf8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .product-detail-info .specs table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-detail-info .specs td {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0e8e0;
+        }
+
+        .product-detail-info .specs td:first-child {
+            font-weight: 600;
+            color: #1a4d2e;
+            width: 40%;
+        }
+
+        .product-detail-info .specs td:last-child {
+            color: #3d2b1f;
+        }
+
+        .product-detail-info .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .product-detail-info .quantity-selector button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #c49b2c;
+            background: #fff;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #1a4d2e;
+        }
+
+        .product-detail-info .quantity-selector button:hover {
+            background: #c49b2c;
+            color: #fff;
+        }
+
+        .product-detail-info .quantity-selector span {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a4d2e;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .product-detail-info .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .product-detail-info .action-buttons .btn-primary {
+            flex: 1;
+            padding: 14px;
+            background: #1a4d2e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .product-detail-info .action-buttons .btn-primary:hover {
+            background: #0d2818;
+        }
+
+        .product-detail-info .action-buttons .btn-secondary {
+            padding: 14px 30px;
+            background: #c49b2c;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .product-detail-info .action-buttons .btn-secondary:hover {
+            background: #a88020;
+        }
+
+        /* Video Section */
+        .video-section {
+            margin-top: 40px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0e8e0;
+        }
+
+        .video-section h3 {
+            color: #1a4d2e;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .video-section h3 i {
+            color: #c49b2c;
+            margin-right: 10px;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Reviews Section */
+        .reviews-section {
+            margin-top: 40px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0e8e0;
+        }
+
+        .reviews-section h3 {
+            color: #1a4d2e;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .reviews-section h3 i {
+            color: #c49b2c;
+            margin-right: 10px;
+        }
+
+        .review-item {
+            border-bottom: 1px solid #f0e8e0;
+            padding: 15px 0;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-item .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .review-item .review-header .reviewer-name {
+            font-weight: 600;
+            color: #1a4d2e;
+        }
+
+        .review-item .review-header .review-date {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .review-item .review-stars {
+            color: #c49b2c;
+            font-size: 16px;
+        }
+
+        .review-item .review-comment {
+            color: #3d2b1f;
+            margin-top: 5px;
+        }
+
+        .review-form {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #c49b2c;
+        }
+
+        .review-form h4 {
+            color: #1a4d2e;
+            margin-bottom: 15px;
+        }
+
+        .review-form .star-rating {
+            display: flex;
+            gap: 5px;
+            font-size: 28px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .review-form .star-rating i {
+            color: #ddd;
+            transition: color 0.3s;
+        }
+
+        .review-form .star-rating i.active {
+            color: #c49b2c;
+        }
+
+        .review-form input,
+        .review-form textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0d5c8;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            background: #fdf8f0;
+        }
+
+        .review-form input:focus,
+        .review-form textarea:focus {
+            outline: none;
+            border-color: #c49b2c;
+        }
+
+        .review-form button {
+            padding: 12px 35px;
+            background: #c49b2c;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 15px;
+        }
+
+        .review-form button:hover {
+            background: #a88020;
+        }
+
+        /* Related Products */
+        .related-products {
+            margin-top: 40px;
+        }
+
+        .related-products h3 {
+            color: #1a4d2e;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .related-products h3 i {
+            color: #c49b2c;
+            margin-right: 10px;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .related-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid #f0e8e0;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .related-card .related-image {
+            height: 150px;
+            background: #fdf8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: #1a4d2e;
+        }
+
+        .related-card .related-info {
+            padding: 12px 15px;
+        }
+
+        .related-card .related-info h4 {
+            font-size: 14px;
+            color: #1a4d2e;
+        }
+
+        .related-card .related-info .related-price {
+            font-weight: bold;
+            color: #1a4d2e;
+            font-size: 16px;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            padding: 20px 0;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .breadcrumb a {
+            color: #1a4d2e;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #c49b2c;
+        }
+
+        .breadcrumb span {
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-detail-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .product-detail-image img {
+                height: 250px;
+            }
+
+            .product-detail-info h1 {
+                font-size: 24px;
+            }
+
+            .product-detail-info .action-buttons {
+                flex-direction: column;
+            }
+
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                <span>Pinaki Farms</span>
+            </div>
+            <nav class="desktop-nav">
+                <a href="index.html">Home</a>
+                <a href="index.html#products">Products</a>
+                <a href="index.html#story">Our Story</a>
+                <a href="index.html#reviews">Reviews</a>
+                <a href="index.html#contact">Contact</a>
+            </nav>
+            <div class="header-actions">
+                <button class="cart-toggle" onclick="window.location.href='index.html'">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="auth-toggle" onclick="window.location.href='index.html'">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Product Detail -->
+    <div class="product-detail-container">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> / 
+                <a href="index.html#products">Products</a> / 
+                <span id="productNameBreadcrumb">Product Details</span>
+            </div>
+
+            <!-- Product Detail Grid -->
+            <div class="product-detail-grid" id="productDetail">
+                <div class="product-detail-image">
+                    <img id="productImage" src="https://placehold.co/600x400/1a4d2e/fdf8f0?text=Product" alt="Product">
+                    <span class="badge" id="productBadge">🔥 Best Seller</span>
+                </div>
+                <div class="product-detail-info">
+                    <span class="category-tag" id="productCategory">Category</span>
+                    <h1 id="productName">Product Name</h1>
+                    <div>
+                        <span class="price" id="productPrice">₹0</span>
+                        <span class="original-price" id="productOriginalPrice">₹0</span>
+                    </div>
+                    <div style="margin:10px 0;">
+                        <span class="purity-badge" id="productPurity">100% Pure</span>
+                        <span style="margin-left:10px;color:#999;" id="productUnit">500g</span>
+                    </div>
+                    <p class="description" id="productDescription">Product description goes here...</p>
+                    
+                    <div class="specs">
+                        <table>
+                            <tr><td>Product Name</td><td id="specName">-</td></tr>
+                            <tr><td>Category</td><td id="specCategory">-</td></tr>
+                            <tr><td>Purity</td><td id="specPurity">-</td></tr>
+                            <tr><td>Unit</td><td id="specUnit">-</td></tr>
+                            <tr><td>In Stock</td><td id="specStock">-</td></tr>
+                            <tr><td>Made In</td><td>Village, India</td></tr>
+                        </table>
+                    </div>
+
+                    <div class="quantity-selector">
+                        <button onclick="changeQuantity(-1)">-</button>
+                        <span id="quantityDisplay">1</span>
+                        <button onclick="changeQuantity(1)">+</button>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="addToCartDetail()">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button class="btn-secondary" onclick="buyNow()">
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Section - How It's Made -->
+            <div class="video-section">
+                <h3><i class="fas fa-play-circle"></i> How It's Made - Traditional Process</h3>
+                <div class="video-container">
+                    <iframe 
+                        id="productVideo"
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                        title="How It's Made"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="reviews-section" id="reviewsSection">
+                <h3><i class="fas fa-star"></i> Customer Reviews</h3>
+                <div id="reviewsList">
+                    <p style="color:#999;">No reviews yet. Be the first to review!</p>
+                </div>
+
+                <!-- Review Form -->
+                <div class="review-form" id="reviewForm">
+                    <h4>Write a Review</h4>
+                    <div class="star-rating" id="starRating">
+                        <i class="fas fa-star" data-value="1" onclick="setRating(1)"></i>
+                        <i class="fas fa-star" data-value="2" onclick="setRating(2)"></i>
+                        <i class="fas fa-star" data-value="3" onclick="setRating(3)"></i>
+                        <i class="fas fa-star" data-value="4" onclick="setRating(4)"></i>
+                        <i class="fas fa-star" data-value="5" onclick="setRating(5)"></i>
+                    </div>
+                    <input type="text" id="reviewerName" placeholder="Your Name" required>
+                    <input type="email" id="reviewerEmail" placeholder="Your Email" required>
+                    <textarea id="reviewComment" rows="3" placeholder="Write your review..." required></textarea>
+                    <button onclick="submitReview()">Submit Review</button>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <div class="related-products">
+                <h3><i class="fas fa-tags"></i> You May Also Like</h3>
+                <div class="related-grid" id="relatedProducts"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Pinaki Farms</h4>
+                    <p>Pure • Natural • Authentic</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.html">Home</a>
+                    <a href="index.html#products">Products</a>
+                    <a href="index.html#story">Our Story</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Pinaki Farms. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        // ============ IMPORTS ============
+        import { db, collection, getDocs, doc, getDoc, addDoc, query, where } from './firebase-config.js';
+
+        // ============ STATE ============
+        let currentProduct = null;
+        let quantity = 1;
+        let selectedRating = 0;
+
+        // ============ GET PRODUCT ID FROM URL ============
+        function getProductId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // ============ LOAD PRODUCT ============
+        async function loadProduct() {
+            const productId = getProductId();
+            if (!productId) {
+                showToast('Product not found');
+                return;
+            }
+
+            try {
+                const docRef = doc(db, 'products', productId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    currentProduct = { id: docSnap.id, ...docSnap.data() };
+                    displayProduct(currentProduct);
+                    loadReviews(productId);
+                    loadRelatedProducts(currentProduct.category);
+                } else {
+                    showToast('Product not found');
+                }
+            } catch (error) {
+                console.error('Error loading product:', error);
+                showToast('Error loading product');
+            }
+        }
+
+        // ============ DISPLAY PRODUCT ============
+        function displayProduct(product) {
+            // Image - Google Drive ya placeholder
+            const imageUrl = product.image || `https://placehold.co/600x400/1a4d2e/fdf8f0?text=${encodeURIComponent(product.name)}`;
+            document.getElementById('productImage').src = imageUrl;
+            document.getElementById('productImage').alt = product.name;
+
+            // Badge
+            const badge = document.getElementById('productBadge');
+            if (product.badge) {
+                badge.textContent = product.badge;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            // Basic Info
+            document.getElementById('productName').textContent = product.name;
+            document.getElementById('productNameBreadcrumb').textContent = product.name;
+            document.getElementById('productCategory').textContent = product.category || 'Product';
+            document.getElementById('productPrice').textContent = `₹${product.price}`;
+            
+            if (product.originalPrice) {
+                document.getElementById('productOriginalPrice').textContent = `₹${product.originalPrice}`;
+                document.getElementById('productOriginalPrice').style.display = 'inline';
+            } else {
+                document.getElementById('productOriginalPrice').style.display = 'none';
+            }
+
+            document.getElementById('productPurity').textContent = product.purity || '100% Pure';
+            document.getElementById('productUnit').textContent = product.unit || 'kg';
+            document.getElementById('productDescription').textContent = product.description || 'No description available.';
+
+            // Specs
+            document.getElementById('specName').textContent = product.name;
+            document.getElementById('specCategory').textContent = product.category || 'N/A';
+            document.getElementById('specPurity').textContent = product.purity || 'N/A';
+            document.getElementById('specUnit').textContent = product.unit || 'N/A';
+            document.getElementById('specStock').textContent = product.inStock ? '✅ In Stock' : '❌ Out of Stock';
+
+            // Video (YouTube)
+            const videoUrl = product.video || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+            document.getElementById('productVideo').src = videoUrl;
+
+            // Update cart count
+            updateCartCount();
+        }
+
+        // ============ QUANTITY ============
+        window.changeQuantity = function(change) {
+            quantity = Math.max(1, quantity + change);
+            document.getElementById('quantityDisplay').textContent = quantity;
+        };
+
+        // ============ ADD TO CART ============
+        window.addToCartDetail = function() {
+            if (!currentProduct) return;
+            
+            let cart = JSON.parse(localStorage.getItem('pinaki_cart') || '[]');
+            const existing = cart.find(item => item.id === currentProduct.id);
+            
+            if (existing) {
+                existing.quantity += quantity;
+            } else {
+                cart.push({ ...currentProduct, quantity: quantity });
+            }
+            
+            localStorage.setItem('pinaki_cart', JSON.stringify(cart));
+            updateCartCount();
+            showToast(`${currentProduct.name} added to cart!`);
+        };
+
+        // ============ BUY NOW ============
+        window.buyNow = function() {
+            addToCartDetail();
+            window.location.href = 'index.html';
+        };
+
+        // ============ UPDATE CART COUNT ============
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('pinaki_cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        // ============ RATING ============
+        window.setRating = function(rating) {
+            selectedRating = rating;
+            document.querySelectorAll('#starRating i').forEach(star => {
+                const value = parseInt(star.dataset.value);
+                star.classList.toggle('active', value <= rating);
+            });
+        };
+
+        // ============ SUBMIT REVIEW ============
+        window.submitReview = async function() {
+            if (!currentProduct) {
+                showToast('Product not loaded');
+                return;
+            }
+
+            const name = document.getElementById('reviewerName').value.trim();
+            const email = document.getElementById('reviewerEmail').value.trim();
+            const comment = document.getElementById('reviewComment').value.trim();
+
+            if (!name || !email || !comment) {
+                showToast('Please fill all fields');
+                return;
+            }
+
+            if (selectedRating === 0) {
+                showToast('Please select a rating');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'reviews'), {
+                    productId: currentProduct.id,
+                    productName: currentProduct.name,
+                    name: name,
+                    email: email,
+                    rating: selectedRating,
+                    comment: comment,
+                    date: new Date().toISOString()
+                });
+
+                showToast('✅ Thank you for your review!');
+                document.getElementById('reviewerName').value = '';
+                document.getElementById('reviewerEmail').value = '';
+                document.getElementById('reviewComment').value = '';
+                selectedRating = 0;
+                document.querySelectorAll('#starRating i').forEach(star => {
+                    star.classList.remove('active');
+                });
+                
+                loadReviews(currentProduct.id);
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                showToast('Error submitting review');
+            }
+        };
+
+        // ============ LOAD REVIEWS ============
+        async function loadReviews(productId) {
+            try {
+                const q = query(collection(db, 'reviews'), where('productId', '==', productId));
+                const querySnapshot = await getDocs(q);
+                const reviews = [];
+                querySnapshot.forEach(doc => {
+                    reviews.push({ id: doc.id, ...doc.data() });
+                });
+
+                const container = document.getElementById('reviewsList');
+                if (reviews.length === 0) {
+                    container.innerHTML = '<p style="color:#999;">No reviews yet. Be the first to review!</p>';
+                    return;
+                }
+
+                container.innerHTML = reviews.map(r => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="reviewer-name">${r.name}</span>
+                            <span class="review-date">${new Date(r.date).toLocaleDateString('en-IN')}</span>
+                        </div>
+                        <div class="review-stars">${'⭐'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                        <div class="review-comment">${r.comment}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        }
+
+        // ============ LOAD RELATED PRODUCTS ============
+        async function loadRelatedProducts(category) {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'products'));
+                const products = [];
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.category === category && data.id !== currentProduct?.id) {
+                        products.push({ id: doc.id, ...data });
+                    }
+                });
+
+                // Shuffle and take first 4
+                const shuffled = products.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+                const container = document.getElementById('relatedProducts');
+                if (shuffled.length === 0) {
+                    container.innerHTML = '<p style="color:#999;">No related products found.</p>';
+                    return;
+                }
+
+                container.innerHTML = shuffled.map(p => `
+                    <a href="product-detail.html?id=${p.id}" class="related-card">
+                        <div class="related-image">${p.emoji || '🌿'}</div>
+                        <div class="related-info">
+                            <h4>${p.name}</h4>
+                            <div class="related-price">₹${p.price}</div>
+                        </div>
+                    </a>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading related products:', error);
+            }
+        }
+
+        // ============ TOAST ============
+        function showToast(message) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProduct();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>
