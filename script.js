@@ -1,7 +1,7 @@
 // script.js
 import { 
     db, auth, storage,
-    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where,
+    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot,
     createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut,
     ref, uploadBytes, getDownloadURL
 } from './firebase-config.js';
@@ -11,9 +11,11 @@ let state = {
     products: [],
     cart: [],
     currentUser: null,
+    currentUserRole: 'customer', // 'customer' or 'admin'
     currentFilter: 'all',
     isCartOpen: false,
-    isAuthOpen: false
+    isAuthOpen: false,
+    isAdminOpen: false
 };
 
 // ============= DOM REFERENCES =============
@@ -39,29 +41,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ============= PRODUCT FUNCTIONS =============
 async function loadProducts() {
     try {
-        const querySnapshot = await getDocs(collection(db, 'products'));
-        state.products = [];
-        querySnapshot.forEach((doc) => {
-            state.products.push({ id: doc.id, ...doc.data() });
+        // Real-time listener for products
+        const q = collection(db, 'products');
+        onSnapshot(q, (snapshot) => {
+            state.products = [];
+            snapshot.forEach((doc) => {
+                state.products.push({ id: doc.id, ...doc.data() });
+            });
+            renderProducts();
         });
-        renderProducts();
     } catch (error) {
         console.error('Error loading products:', error);
-        // Load sample products if Firebase fails
         loadSampleProducts();
     }
 }
 
 function loadSampleProducts() {
     const sampleProducts = [
-        { id: '1', name: 'Organic Tomatoes', category: 'vegetables', price: 60, originalPrice: 80, emoji: '🍅', purity: '100% Organic', unit: 'kg' },
-        { id: '2', name: 'Fresh Spinach', category: 'vegetables', price: 40, originalPrice: 55, emoji: '🥬', purity: 'Pesticide Free', unit: 'bundle' },
-        { id: '3', name: 'Organic Apples', category: 'fruits', price: 120, originalPrice: 150, emoji: '🍎', purity: 'Wax Free', unit: 'kg' },
-        { id: '4', name: 'Farm Fresh Mangoes', category: 'fruits', price: 80, originalPrice: 100, emoji: '🥭', purity: 'Tree Ripened', unit: 'kg' },
-        { id: '5', name: 'Brown Rice', category: 'grains', price: 90, originalPrice: 110, emoji: '🍚', purity: 'Unpolished', unit: 'kg' },
-        { id: '6', name: 'Wheat Flour', category: 'grains', price: 55, originalPrice: 70, emoji: '🌾', purity: 'Stone Ground', unit: 'kg' },
-        { id: '7', name: 'Farm Fresh Milk', category: 'dairy', price: 60, originalPrice: 75, emoji: '🥛', purity: 'A2 Desi', unit: 'litre' },
-        { id: '8', name: 'Organic Curd', category: 'dairy', price: 50, originalPrice: 65, emoji: '🫕', purity: 'Probiotic', unit: 'kg' }
+        { id: '1', name: 'Organic Tomatoes', category: 'vegetables', price: 60, originalPrice: 80, emoji: '🍅', purity: '100% Organic', unit: 'kg', inStock: true },
+        { id: '2', name: 'Fresh Spinach', category: 'vegetables', price: 40, originalPrice: 55, emoji: '🥬', purity: 'Pesticide Free', unit: 'bundle', inStock: true },
+        { id: '3', name: 'Organic Apples', category: 'fruits', price: 120, originalPrice: 150, emoji: '🍎', purity: 'Wax Free', unit: 'kg', inStock: true },
+        { id: '4', name: 'Farm Fresh Mangoes', category: 'fruits', price: 80, originalPrice: 100, emoji: '🥭', purity: 'Tree Ripened', unit: 'kg', inStock: true },
+        { id: '5', name: 'Brown Rice', category: 'grains', price: 90, originalPrice: 110, emoji: '🍚', purity: 'Unpolished', unit: 'kg', inStock: true },
+        { id: '6', name: 'Wheat Flour', category: 'grains', price: 55, originalPrice: 70, emoji: '🌾', purity: 'Stone Ground', unit: 'kg', inStock: true },
+        { id: '7', name: 'Farm Fresh Milk', category: 'dairy', price: 60, originalPrice: 75, emoji: '🥛', purity: 'A2 Desi', unit: 'litre', inStock: true },
+        { id: '8', name: 'Organic Curd', category: 'dairy', price: 50, originalPrice: 65, emoji: '🫕', purity: 'Probiotic', unit: 'kg', inStock: true }
     ];
     state.products = sampleProducts;
     renderProducts();
@@ -81,6 +85,9 @@ function renderProducts() {
         );
     }
     
+    // Show admin controls if user is admin
+    const isAdmin = state.currentUserRole === 'admin';
+    
     productGrid.innerHTML = filtered.map(product => `
         <div class="product-card">
             <div class="product-image">${product.emoji || '🌿'}</div>
@@ -91,45 +98,136 @@ function renderProducts() {
                     ₹${product.price}/${product.unit || 'kg'}
                     ${product.originalPrice ? `<span class="product-original">₹${product.originalPrice}</span>` : ''}
                 </div>
-                <button class="add-to-cart" onclick="addToCart('${product.id}')">
-                    <i class="fas fa-plus"></i> Add to Cart
-                </button>
+                ${product.inStock !== false ? `
+                    <button class="add-to-cart" onclick="addToCart('${product.id}')">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                ` : `
+                    <button class="out-of-stock" disabled style="width:100%;padding:10px;background:#ccc;border:none;border-radius:5px;cursor:not-allowed;">
+                        Out of Stock
+                    </button>
+                `}
+                ${isAdmin ? `
+                    <div style="margin-top:10px;display:flex;gap:5px;">
+                        <button onclick="editProduct('${product.id}')" style="flex:1;padding:5px;background:#3498db;color:#fff;border:none;border-radius:3px;cursor:pointer;">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteProduct('${product.id}')" style="flex:1;padding:5px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `).join('');
 }
 
-function filterProducts(category) {
-    state.currentFilter = category;
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase() === category || (category === 'all' && btn.textContent === 'All'));
-    });
-    renderProducts();
-}
-
-function searchProducts() {
-    renderProducts();
-}
-
-function toggleSearch() {
-    searchBar.classList.toggle('active');
-    if (searchBar.classList.contains('active')) {
-        searchInput.focus();
+// ============= ADMIN FUNCTIONS =============
+async function addProduct(event) {
+    event.preventDefault();
+    const form = event.target;
+    const productData = {
+        name: form.querySelector('#productName').value,
+        category: form.querySelector('#productCategory').value,
+        price: Number(form.querySelector('#productPrice').value),
+        originalPrice: Number(form.querySelector('#productOriginalPrice').value) || null,
+        emoji: form.querySelector('#productEmoji').value || '🌿',
+        purity: form.querySelector('#productPurity').value || 'Pure',
+        unit: form.querySelector('#productUnit').value || 'kg',
+        inStock: form.querySelector('#productInStock').checked,
+        description: form.querySelector('#productDescription').value || '',
+        createdAt: new Date().toISOString()
+    };
+    
+    try {
+        await addDoc(collection(db, 'products'), productData);
+        showToast('Product added successfully!');
+        form.reset();
+        document.getElementById('adminModal').classList.remove('active');
+    } catch (error) {
+        showToast('Failed to add product: ' + error.message);
     }
 }
 
-function scrollToProducts() {
-    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+async function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+        await deleteDoc(doc(db, 'products', productId));
+        showToast('Product deleted successfully!');
+    } catch (error) {
+        showToast('Failed to delete product: ' + error.message);
+    }
 }
 
-function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+async function editProduct(productId) {
+    const product = state.products.find(p => p.id === productId);
+    if (!product) return;
+    
+    // Open admin modal with product data
+    const modal = document.getElementById('adminModal');
+    const form = document.getElementById('adminProductForm');
+    form.querySelector('#productName').value = product.name;
+    form.querySelector('#productCategory').value = product.category;
+    form.querySelector('#productPrice').value = product.price;
+    form.querySelector('#productOriginalPrice').value = product.originalPrice || '';
+    form.querySelector('#productEmoji').value = product.emoji || '🌿';
+    form.querySelector('#productPurity').value = product.purity || 'Pure';
+    form.querySelector('#productUnit').value = product.unit || 'kg';
+    form.querySelector('#productInStock').checked = product.inStock !== false;
+    form.querySelector('#productDescription').value = product.description || '';
+    
+    // Change form to update mode
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        await updateProduct(productId, form);
+    };
+    
+    modal.classList.add('active');
+}
+
+async function updateProduct(productId, form) {
+    const productData = {
+        name: form.querySelector('#productName').value,
+        category: form.querySelector('#productCategory').value,
+        price: Number(form.querySelector('#productPrice').value),
+        originalPrice: Number(form.querySelector('#productOriginalPrice').value) || null,
+        emoji: form.querySelector('#productEmoji').value || '🌿',
+        purity: form.querySelector('#productPurity').value || 'Pure',
+        unit: form.querySelector('#productUnit').value || 'kg',
+        inStock: form.querySelector('#productInStock').checked,
+        description: form.querySelector('#productDescription').value || '',
+        updatedAt: new Date().toISOString()
+    };
+    
+    try {
+        await updateDoc(doc(db, 'products', productId), productData);
+        showToast('Product updated successfully!');
+        form.reset();
+        document.getElementById('adminModal').classList.remove('active');
+        // Reset form submit handler
+        form.onsubmit = addProduct;
+    } catch (error) {
+        showToast('Failed to update product: ' + error.message);
+    }
+}
+
+function toggleAdmin() {
+    state.isAdminOpen = !state.isAdminOpen;
+    document.getElementById('adminModal').classList.toggle('active');
+    // Reset form
+    const form = document.getElementById('adminProductForm');
+    form.reset();
+    form.onsubmit = addProduct;
 }
 
 // ============= CART FUNCTIONS =============
 function addToCart(productId) {
     const product = state.products.find(p => p.id === productId);
-    if (!product) return;
+    if (!product || product.inStock === false) {
+        showToast('Product is out of stock!');
+        return;
+    }
     
     const existing = state.cart.find(item => item.id === productId);
     if (existing) {
@@ -266,14 +364,16 @@ async function signup(event) {
     const name = document.getElementById('signupName').value;
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
+    const role = document.getElementById('signupRole')?.value || 'customer';
     
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Save user name to Firestore
+        // Save user to Firestore with role
         await addDoc(collection(db, 'users'), {
             uid: userCredential.user.uid,
             name: name,
             email: email,
+            role: role, // 'customer' or 'admin'
             createdAt: new Date().toISOString()
         });
         toggleAuth();
@@ -288,25 +388,59 @@ async function logout() {
     try {
         await signOut(auth);
         showToast('Logged out successfully');
+        state.currentUserRole = 'customer';
+        renderProducts();
     } catch (error) {
         showToast('Logout failed: ' + error.message);
     }
 }
 
 function setupAuthListener() {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         state.currentUser = user;
+        
+        if (user) {
+            // Check user role from Firestore
+            try {
+                const q = query(collection(db, 'users'), where('uid', '==', user.uid));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    state.currentUserRole = userData.role || 'customer';
+                });
+            } catch (error) {
+                console.error('Error fetching user role:', error);
+            }
+        } else {
+            state.currentUserRole = 'customer';
+        }
+        
         // Update UI based on auth state
         const authBtn = document.querySelector('.auth-toggle');
+        const adminBtn = document.querySelector('.admin-toggle');
+        
         if (user) {
             authBtn.innerHTML = `<i class="fas fa-user-check"></i>`;
             authBtn.title = 'Logout';
             authBtn.onclick = logout;
+            
+            // Show admin button if admin
+            if (state.currentUserRole === 'admin' && adminBtn) {
+                adminBtn.style.display = 'flex';
+            } else if (adminBtn) {
+                adminBtn.style.display = 'none';
+            }
         } else {
             authBtn.innerHTML = `<i class="fas fa-user"></i>`;
             authBtn.title = 'Login';
             authBtn.onclick = toggleAuth;
+            
+            if (adminBtn) {
+                adminBtn.style.display = 'none';
+            }
         }
+        
+        renderProducts();
     });
 }
 
@@ -320,7 +454,6 @@ async function loadReviews() {
         });
         renderReviews(reviews);
     } catch (error) {
-        // Load sample reviews
         renderReviews([
             { name: 'Priya Sharma', rating: 5, comment: 'Best organic products I\'ve ever bought! The vegetables are always fresh.', date: '2024-01-15' },
             { name: 'Rahul Verma', rating: 5, comment: 'I love the farm-fresh milk. It tastes exactly like how milk should taste!', date: '2024-01-10' },
@@ -331,6 +464,7 @@ async function loadReviews() {
 
 function renderReviews(reviews) {
     const grid = document.getElementById('reviewGrid');
+    if (!grid) return;
     grid.innerHTML = reviews.map(review => `
         <div class="review-card">
             <div class="stars">${'⭐'.repeat(review.rating)}</div>
@@ -361,37 +495,13 @@ async function submitContact(event) {
     }
 }
 
-// ============= TOAST NOTIFICATION =============
-function showToast(message) {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
-    
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+// ============= SEARCH FUNCTIONS =============
+function filterProducts(category) {
+    state.currentFilter = category;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === category || (category === 'all' && btn.textContent === 'All'));
+    });
+    renderProducts();
 }
 
-// ============= EXPOSE FUNCTIONS TO GLOBAL SCOPE =============
-window.addToCart = addToCart;
-window.removeFromCart = removeFromCart;
-window.updateQuantity = updateQuantity;
-window.toggleCart = toggleCart;
-window.checkout = checkout;
-window.toggleAuth = toggleAuth;
-window.switchAuthTab = switchAuthTab;
-window.login = login;
-window.signup = signup;
-window.logout = logout;
-window.filterProducts = filterProducts;
-window.searchProducts = searchProducts;
-window.toggleSearch = toggleSearch;
-window.scrollToProducts = scrollToProducts;
-window.scrollToSection = scrollToSection;
-window.submitContact = submitContact;
+function searchProducts
