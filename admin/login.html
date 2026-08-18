@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Fallback styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
         .admin-login-container {
@@ -33,6 +32,16 @@
         .login-error {
             background: #fee;
             color: #e74c3c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+        .login-success {
+            background: #d4edda;
+            color: #155724;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -66,6 +75,7 @@
         }
         .admin-login-btn:hover { background: #1a3a16; }
         .admin-login-btn i { margin-right: 8px; }
+        .admin-login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .back-link { text-align: center; margin-top: 15px; }
         .back-link a { color: #2d5a27; text-decoration: none; font-size: 14px; }
         .back-link a:hover { text-decoration: underline; }
@@ -102,6 +112,7 @@
             </div>
             
             <div id="loginError" class="login-error"></div>
+            <div id="loginSuccess" class="login-success"></div>
             
             <form id="adminLoginForm">
                 <div class="form-group">
@@ -112,7 +123,7 @@
                     <label><i class="fas fa-lock"></i> Password</label>
                     <input type="password" id="adminPassword" placeholder="Enter your password" required autocomplete="current-password" />
                 </div>
-                <button type="submit" class="admin-login-btn">
+                <button type="submit" class="admin-login-btn" id="loginBtn">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
                 <p class="back-link">
@@ -123,7 +134,7 @@
     </div>
 
     <script type="module">
-        // ============ FIXED IMPORTS ============
+        // ============ IMPORTS ============
         import { 
             auth, 
             signInWithEmailAndPassword, 
@@ -142,24 +153,34 @@
         const emailInput = document.getElementById('adminEmail');
         const passwordInput = document.getElementById('adminPassword');
         const errorDiv = document.getElementById('loginError');
+        const successDiv = document.getElementById('loginSuccess');
+        const loginBtn = document.getElementById('loginBtn');
 
         // ============ CHECK IF ALREADY LOGGED IN ============
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log('User already logged in:', user.email);
+                console.log('👤 User already logged in:', user.email);
                 try {
+                    console.log('🔍 Checking admin collection for:', user.email);
                     const q = query(collection(db, 'admins'), where('email', '==', user.email));
                     const querySnapshot = await getDocs(q);
+                    
+                    console.log('📊 Admin docs found:', querySnapshot.size);
+                    
                     if (!querySnapshot.empty) {
-                        console.log('✅ Admin verified, redirecting...');
+                        console.log('✅ Admin verified, redirecting to dashboard...');
                         window.location.href = 'dashboard.html';
                     } else {
                         console.log('❌ Not admin, logging out...');
                         await signOut(auth);
+                        // Refresh page after logout
+                        window.location.reload();
                     }
                 } catch (error) {
-                    console.error('Error checking admin:', error);
+                    console.error('❌ Error checking admin:', error);
                 }
+            } else {
+                console.log('👤 No user logged in');
             }
         });
 
@@ -185,8 +206,12 @@
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             
+            console.log('🔑 Login attempt for:', email);
+            
             errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
             errorDiv.textContent = '';
+            successDiv.textContent = '';
             
             if (!email || !password) {
                 errorDiv.textContent = '⚠️ Please fill all fields';
@@ -194,41 +219,40 @@
                 return;
             }
             
-            const submitBtn = form.querySelector('.admin-login-btn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-            submitBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            loginBtn.disabled = true;
             
             try {
-                console.log('🔑 Attempting login for:', email);
-                
-                // Sign in with Firebase Auth
+                console.log('🔐 Signing in...');
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log('✅ Login successful:', user.email);
                 
-                // Check if user is admin
+                console.log('🔍 Checking admin collection for:', user.email);
                 const q = query(collection(db, 'admins'), where('email', '==', user.email));
                 const querySnapshot = await getDocs(q);
                 
+                console.log('📊 Admin docs found:', querySnapshot.size);
+                
                 if (querySnapshot.empty) {
-                    console.log('❌ User is not admin');
+                    console.log('❌ User not in admins collection');
                     errorDiv.textContent = '❌ You are not authorized as admin. Please contact support.';
                     errorDiv.style.display = 'block';
                     await signOut(auth);
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                    loginBtn.disabled = false;
                     return;
                 }
                 
-                // Get admin data
                 let adminData = {};
                 querySnapshot.forEach((doc) => {
                     adminData = { id: doc.id, ...doc.data() };
                 });
-                console.log('✅ Admin verified:', adminData);
+                console.log('✅ Admin data:', adminData);
                 
-                showToast('✅ Welcome Admin! Redirecting...', 'success');
+                successDiv.textContent = '✅ Welcome Admin! Redirecting...';
+                successDiv.style.display = 'block';
+                showToast('✅ Welcome Admin!', 'success');
                 
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
@@ -250,19 +274,13 @@
                 }
                 errorDiv.textContent = errorMsg;
                 errorDiv.style.display = 'block';
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // ============ KEYBOARD SHORTCUTS ============
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                errorDiv.style.display = 'none';
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                loginBtn.disabled = false;
             }
         });
 
         console.log('✅ Admin Login ready!');
+        console.log('🔑 Use: admin@pinakifarms.com / Admin@123456');
     </script>
 </body>
 </html>
