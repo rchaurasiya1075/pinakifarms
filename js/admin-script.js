@@ -1,4 +1,4 @@
-// js/admin-script.js - COMPLETE FIXED
+// js/admin-script.js - Updated with Image & Video Fields
 import { 
     auth,
     db,
@@ -15,37 +15,76 @@ import {
     onAuthStateChanged
 } from '../firebase-config.js';
 
-console.log('✅ Admin Script loaded');
+console.log('✅ Admin Script loaded!');
 
-// ============================================
-// CONSTANTS
-// ============================================
 const ADMIN_EMAIL = 'admin@pinakifarms.com';
-const COLLECTIONS = {
-    ADMINS: 'admins',
-    PRODUCTS: 'products',
-    ORDERS: 'orders',
-    USERS: 'users',
-    REVIEWS: 'reviews'
+
+// ============ AUTH CHECK ============
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if (user.email !== ADMIN_EMAIL) {
+        await signOut(auth);
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    try {
+        const q = query(collection(db, 'admins'), where('email', '==', user.email));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+            await addDoc(collection(db, 'admins'), {
+                email: user.email,
+                name: 'Admin',
+                role: 'admin',
+                createdAt: new Date().toISOString()
+            });
+        }
+        
+        const nameEl = document.getElementById('adminName');
+        if (nameEl) nameEl.textContent = 'Admin';
+        
+        const path = window.location.pathname;
+        if (path.includes('dashboard.html')) {
+            loadDashboard();
+        } else if (path.includes('products.html')) {
+            loadProducts();
+        } else if (path.includes('orders.html')) {
+            loadOrders();
+        } else if (path.includes('customers.html')) {
+            loadCustomers();
+        } else if (path.includes('reviews.html')) {
+            loadReviews();
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+// ============ LOGOUT ============
+window.logoutAdmin = async function() {
+    if (confirm('Are you sure you want to logout?')) {
+        try {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        } catch (error) {
+            showToast('Logout failed');
+        }
+    }
 };
 
-// ============================================
-// HELPERS
-// ============================================
-const $ = (id) => document.getElementById(id);
-const log = {
-    info: (m) => console.log('ℹ️', m),
-    success: (m) => console.log('✅', m),
-    error: (m) => console.error('❌', m),
-    debug: (m) => console.log('🔍', m)
-};
-
-function showToast(message, type = 'success') {
+// ============ TOAST ============
+function showToast(message) {
     const existing = document.querySelector('.toast');
     if (existing) existing.remove();
     
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = 'toast';
     toast.textContent = message;
     document.body.appendChild(toast);
     
@@ -56,121 +95,53 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// ============================================
-// AUTH
-// ============================================
-async function verifyAdmin(user) {
-    if (!user) {
-        window.location.href = 'login.html';
-        return false;
-    }
-    
-    if (user.email !== ADMIN_EMAIL) {
-        log.error('Not admin email');
-        await signOut(auth);
-        window.location.href = 'login.html';
-        return false;
-    }
-    
-    try {
-        const q = query(collection(db, COLLECTIONS.ADMINS), where('email', '==', user.email));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-            log.info('Creating admin document...');
-            await addDoc(collection(db, COLLECTIONS.ADMINS), {
-                email: user.email,
-                name: 'Admin',
-                role: 'admin',
-                createdAt: new Date().toISOString()
-            });
-            log.success('Admin document created');
-        }
-        
-        return true;
-    } catch (error) {
-        log.error('Verify admin error:', error);
-        return false;
-    }
-}
-
-// ============================================
-// AUTH LISTENER
-// ============================================
-onAuthStateChanged(auth, async (user) => {
-    log.debug('Auth state:', user ? 'Logged in' : 'Logged out');
-    
-    if (!user) {
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    const isAdmin = await verifyAdmin(user);
-    if (!isAdmin) return;
-    
-    const nameEl = $('adminName');
-    if (nameEl) nameEl.textContent = 'Admin';
-    
-    const path = window.location.pathname;
-    if (path.includes('dashboard.html')) loadDashboard();
-    else if (path.includes('products.html')) loadProducts();
-    else if (path.includes('orders.html')) loadOrders();
-    else if (path.includes('customers.html')) loadCustomers();
-    else if (path.includes('reviews.html')) loadReviews();
-});
-
-// ============================================
-// LOGOUT
-// ============================================
-window.logoutAdmin = async function() {
-    if (!confirm('Logout?')) return;
-    try {
-        await signOut(auth);
-        window.location.href = 'login.html';
-        showToast('Logged out');
-    } catch (error) {
-        showToast('Logout failed', 'error');
-    }
-};
-
-// ============================================
-// DASHBOARD
-// ============================================
+// ============ DASHBOARD ============
 async function loadDashboard() {
     try {
-        const products = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
-        const orders = await getDocs(collection(db, COLLECTIONS.ORDERS));
-        const users = await getDocs(collection(db, COLLECTIONS.USERS));
+        const productsSnap = await getDocs(collection(db, 'products'));
+        const totalProducts = document.getElementById('totalProducts');
+        if (totalProducts) totalProducts.textContent = productsSnap.size;
+        
+        const ordersSnap = await getDocs(collection(db, 'orders'));
+        const totalOrders = document.getElementById('totalOrders');
+        if (totalOrders) totalOrders.textContent = ordersSnap.size;
         
         let revenue = 0;
-        orders.forEach(doc => {
+        ordersSnap.forEach(doc => {
             const data = doc.data();
             revenue += data.total || 0;
         });
+        const totalRevenue = document.getElementById('totalRevenue');
+        if (totalRevenue) totalRevenue.textContent = '₹' + revenue;
         
-        updateElement('totalProducts', products.size);
-        updateElement('totalOrders', orders.size);
-        updateElement('totalRevenue', '₹' + revenue);
-        updateElement('totalCustomers', users.size);
+        const customersSnap = await getDocs(collection(db, 'users'));
+        const totalCustomers = document.getElementById('totalCustomers');
+        if (totalCustomers) totalCustomers.textContent = customersSnap.size;
         
-        // Recent orders
-        let recent = [];
-        orders.forEach(doc => recent.push({ id: doc.id, ...doc.data() }));
-        recent.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        recent = recent.slice(0, 5);
+        let orders = [];
+        ordersSnap.forEach(doc => {
+            orders.push({ id: doc.id, ...doc.data() });
+        });
+        orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        orders = orders.slice(0, 5);
         
-        const list = $('recentOrdersList');
+        const list = document.getElementById('recentOrdersList');
         if (list) {
-            if (recent.length === 0) {
-                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No orders</p>';
+            if (orders.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No orders yet</p>';
             } else {
                 list.innerHTML = `
                     <table class="admin-table">
-                        <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+                        <thead><tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr></thead>
                         <tbody>
-                            ${recent.map(o => `
+                            ${orders.map(o => `
                                 <tr>
-                                    <td>#${o.id.slice(0,8)}</td>
+                                    <td>#${o.id.slice(0, 8)}</td>
                                     <td>${o.userName || 'N/A'}</td>
                                     <td>₹${o.total || 0}</td>
                                     <td><span class="status-badge status-${o.status || 'pending'}">${o.status || 'Pending'}</span></td>
@@ -182,29 +153,24 @@ async function loadDashboard() {
             }
         }
     } catch (error) {
-        log.error('Dashboard error:', error);
+        console.error('Dashboard error:', error);
     }
 }
 
-function updateElement(id, value) {
-    const el = $(id);
-    if (el) el.textContent = value;
-}
-
-// ============================================
-// PRODUCTS
-// ============================================
+// ============ PRODUCTS ============
 async function loadProducts() {
     try {
-        const snapshot = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
+        const querySnapshot = await getDocs(collection(db, 'products'));
         const products = [];
-        snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+        querySnapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() });
+        });
         
-        const tbody = $('productList');
+        const tbody = document.getElementById('productList');
         if (!tbody) return;
         
         if (products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No products</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">No products found</td></tr>';
             return;
         }
         
@@ -214,128 +180,143 @@ async function loadProducts() {
                 <td><strong>${p.name}</strong></td>
                 <td>${p.category}</td>
                 <td><strong>₹${p.price}</strong></td>
-                <td>${p.originalPrice ? '₹' + p.originalPrice : '-'}</td>
                 <td>${p.inStock ? '✅ In Stock' : '❌ Out of Stock'}</td>
                 <td>
-                    <button class="admin-edit-btn" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="admin-delete-btn" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="admin-edit-btn" onclick="editProduct('${p.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="admin-delete-btn" onclick="deleteProduct('${p.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `).join('');
+        
     } catch (error) {
-        log.error('Load products error:', error);
+        console.error('Error loading products:', error);
     }
 }
 
-// ============================================
-// PRODUCT CRUD
-// ============================================
+// ============ OPEN ADD PRODUCT ============
 window.openAddProduct = function() {
-    const modal = $('productModal');
+    const modal = document.getElementById('productModal');
     if (!modal) return;
-    $('modalTitle').textContent = 'Add Product';
-    $('productForm').reset();
-    $('productId').value = '';
+    document.getElementById('modalTitle').textContent = 'Add New Product';
+    document.getElementById('productForm').reset();
+    document.getElementById('productId').value = '';
     modal.classList.add('active');
 };
 
+// ============ CLOSE MODAL ============
 window.closeProductModal = function() {
-    const modal = $('productModal');
+    const modal = document.getElementById('productModal');
     if (modal) modal.classList.remove('active');
 };
 
-// Product Form
-const productForm = $('productForm');
+// ============ SAVE PRODUCT ============
+const productForm = document.getElementById('productForm');
 if (productForm) {
     productForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const id = $('productId').value;
+        const id = document.getElementById('productId').value;
         const data = {
-            name: $('pName').value.trim(),
-            category: $('pCategory').value,
-            price: parseFloat($('pPrice').value),
-            originalPrice: parseFloat($('pOriginalPrice').value) || null,
-            emoji: $('pEmoji').value.trim() || '🌿',
-            purity: $('pPurity').value.trim() || 'Pure',
-            unit: $('pUnit').value.trim() || 'kg',
-            inStock: $('pInStock').value === 'true',
-            description: $('pDescription').value.trim() || ''
+            name: document.getElementById('pName').value.trim(),
+            category: document.getElementById('pCategory').value,
+            price: parseFloat(document.getElementById('pPrice').value),
+            originalPrice: parseFloat(document.getElementById('pOriginalPrice').value) || null,
+            emoji: document.getElementById('pEmoji').value.trim() || '🌿',
+            purity: document.getElementById('pPurity').value.trim() || 'Pure',
+            unit: document.getElementById('pUnit').value.trim() || 'kg',
+            inStock: document.getElementById('pInStock').value === 'true',
+            badge: document.getElementById('pBadge').value || '',
+            // ============ NEW: Image & Video URLs ============
+            image: document.getElementById('pImage').value.trim() || '',
+            video: document.getElementById('pVideo').value.trim() || '',
+            description: document.getElementById('pDescription').value.trim() || ''
         };
         
         try {
             if (id) {
-                await updateDoc(doc(db, COLLECTIONS.PRODUCTS, id), data);
-                showToast('✅ Product updated');
+                await updateDoc(doc(db, 'products', id), data);
+                showToast('✅ Product updated successfully!');
             } else {
-                await addDoc(collection(db, COLLECTIONS.PRODUCTS), data);
-                showToast('✅ Product added');
+                await addDoc(collection(db, 'products'), data);
+                showToast('✅ Product added successfully!');
             }
             closeProductModal();
             loadProducts();
         } catch (error) {
-            showToast('❌ Error: ' + error.message, 'error');
+            showToast('❌ Error: ' + error.message);
         }
     });
 }
 
-window.editProduct = async function(id) {
+// ============ EDIT PRODUCT ============
+window.editProduct = async function(productId) {
     try {
-        const docSnap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id));
+        const docRef = doc(db, 'products', productId);
+        const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
-            $('modalTitle').textContent = 'Edit Product';
-            $('productId').value = id;
-            $('pName').value = data.name || '';
-            $('pCategory').value = data.category || '';
-            $('pPrice').value = data.price || '';
-            $('pOriginalPrice').value = data.originalPrice || '';
-            $('pEmoji').value = data.emoji || '';
-            $('pPurity').value = data.purity || '';
-            $('pUnit').value = data.unit || '';
-            $('pInStock').value = data.inStock ? 'true' : 'false';
-            $('pDescription').value = data.description || '';
-            $('productModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = 'Edit Product';
+            document.getElementById('productId').value = productId;
+            document.getElementById('pName').value = data.name || '';
+            document.getElementById('pCategory').value = data.category || '';
+            document.getElementById('pPrice').value = data.price || '';
+            document.getElementById('pOriginalPrice').value = data.originalPrice || '';
+            document.getElementById('pEmoji').value = data.emoji || '';
+            document.getElementById('pPurity').value = data.purity || '';
+            document.getElementById('pUnit').value = data.unit || '';
+            document.getElementById('pInStock').value = data.inStock ? 'true' : 'false';
+            document.getElementById('pBadge').value = data.badge || '';
+            // ============ NEW: Image & Video URLs ============
+            document.getElementById('pImage').value = data.image || '';
+            document.getElementById('pVideo').value = data.video || '';
+            document.getElementById('pDescription').value = data.description || '';
+            document.getElementById('productModal').classList.add('active');
         }
     } catch (error) {
-        showToast('❌ Error loading product', 'error');
+        showToast('❌ Error loading product');
     }
 };
 
-window.deleteProduct = async function(id) {
-    if (!confirm('Delete this product?')) return;
+// ============ DELETE PRODUCT ============
+window.deleteProduct = async function(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
     try {
-        await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, id));
-        showToast('✅ Product deleted');
+        await deleteDoc(doc(db, 'products', productId));
+        showToast('✅ Product deleted!');
         loadProducts();
     } catch (error) {
-        showToast('❌ Error deleting', 'error');
+        showToast('❌ Error deleting product');
     }
 };
 
-// ============================================
-// ORDERS
-// ============================================
+// ============ ORDERS ============
 async function loadOrders() {
     try {
-        const snapshot = await getDocs(collection(db, COLLECTIONS.ORDERS));
+        const querySnapshot = await getDocs(collection(db, 'orders'));
         const orders = [];
-        snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+        querySnapshot.forEach(doc => {
+            orders.push({ id: doc.id, ...doc.data() });
+        });
         orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
-        const tbody = $('orderList');
+        const tbody = document.getElementById('orderList');
         if (!tbody) return;
         
         if (orders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No orders</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No orders found</td></tr>';
             return;
         }
         
         tbody.innerHTML = orders.map(o => `
             <tr>
-                <td>#${o.id.slice(0,8)}</td>
+                <td>#${o.id.slice(0, 8)}</td>
                 <td>${o.userName || 'N/A'}</td>
-                <td>${o.items?.length || 0}</td>
+                <td>${o.items?.length || 0} items</td>
                 <td><strong>₹${o.total || 0}</strong></td>
                 <td>${o.paymentMethod || 'N/A'}</td>
                 <td>
@@ -348,62 +329,68 @@ async function loadOrders() {
                     </select>
                 </td>
                 <td>
-                    <button class="admin-delete-btn" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="admin-delete-btn" onclick="deleteOrder('${o.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `).join('');
+        
     } catch (error) {
-        log.error('Load orders error:', error);
+        console.error('Error loading orders:', error);
     }
 }
 
-window.updateOrderStatus = async function(id, status) {
+// ============ UPDATE ORDER STATUS ============
+window.updateOrderStatus = async function(orderId, status) {
     try {
-        await updateDoc(doc(db, COLLECTIONS.ORDERS, id), {
+        await updateDoc(doc(db, 'orders', orderId), {
             status: status,
             updatedAt: new Date().toISOString()
         });
-        showToast('✅ Status updated');
+        showToast('✅ Order status updated!');
         loadOrders();
     } catch (error) {
-        showToast('❌ Error updating', 'error');
+        showToast('❌ Error updating order');
     }
 };
 
-window.deleteOrder = async function(id) {
-    if (!confirm('Delete this order?')) return;
+// ============ DELETE ORDER ============
+window.deleteOrder = async function(orderId) {
+    if (!confirm('Are you sure you want to delete this order?')) return;
+    
     try {
-        await deleteDoc(doc(db, COLLECTIONS.ORDERS, id));
-        showToast('✅ Order deleted');
+        await deleteDoc(doc(db, 'orders', orderId));
+        showToast('✅ Order deleted!');
         loadOrders();
     } catch (error) {
-        showToast('❌ Error deleting', 'error');
+        showToast('❌ Error deleting order');
     }
 };
 
-window.filterOrders = function() { loadOrders(); };
-
-// ============================================
-// CUSTOMERS
-// ============================================
+// ============ CUSTOMERS ============
 async function loadCustomers() {
     try {
-        const snapshot = await getDocs(collection(db, COLLECTIONS.USERS));
+        const querySnapshot = await getDocs(collection(db, 'users'));
         const customers = [];
-        snapshot.forEach(doc => customers.push({ id: doc.id, ...doc.data() }));
-        
-        const ordersSnap = await getDocs(collection(db, COLLECTIONS.ORDERS));
-        const counts = {};
-        ordersSnap.forEach(doc => {
-            const data = doc.data();
-            if (data.userId) counts[data.userId] = (counts[data.userId] || 0) + 1;
+        querySnapshot.forEach(doc => {
+            customers.push({ id: doc.id, ...doc.data() });
         });
         
-        const tbody = $('customerList');
+        const ordersSnap = await getDocs(collection(db, 'orders'));
+        const orderCounts = {};
+        ordersSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.userId) {
+                orderCounts[data.userId] = (orderCounts[data.userId] || 0) + 1;
+            }
+        });
+        
+        const tbody = document.getElementById('customerList');
         if (!tbody) return;
         
         if (customers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No customers</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No customers found</td></tr>';
             return;
         }
         
@@ -412,30 +399,31 @@ async function loadCustomers() {
                 <td><strong>${c.name || 'N/A'}</strong></td>
                 <td>${c.email}</td>
                 <td>${c.phone || 'N/A'}</td>
-                <td>${counts[c.uid] || 0}</td>
+                <td>${orderCounts[c.uid] || 0}</td>
                 <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
             </tr>
         `).join('');
+        
     } catch (error) {
-        log.error('Load customers error:', error);
+        console.error('Error loading customers:', error);
     }
 }
 
-// ============================================
-// REVIEWS
-// ============================================
+// ============ REVIEWS ============
 async function loadReviews() {
     try {
-        const snapshot = await getDocs(collection(db, COLLECTIONS.REVIEWS));
+        const querySnapshot = await getDocs(collection(db, 'reviews'));
         const reviews = [];
-        snapshot.forEach(doc => reviews.push({ id: doc.id, ...doc.data() }));
+        querySnapshot.forEach(doc => {
+            reviews.push({ id: doc.id, ...doc.data() });
+        });
         reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        const tbody = $('reviewList');
+        const tbody = document.getElementById('reviewList');
         if (!tbody) return;
         
         if (reviews.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No reviews</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No reviews found</td></tr>';
             return;
         }
         
@@ -446,24 +434,34 @@ async function loadReviews() {
                 <td>${r.comment || ''}</td>
                 <td>${r.date || 'N/A'}</td>
                 <td>
-                    <button class="admin-delete-btn" onclick="deleteReview('${r.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="admin-delete-btn" onclick="deleteReview('${r.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `).join('');
+        
     } catch (error) {
-        log.error('Load reviews error:', error);
+        console.error('Error loading reviews:', error);
     }
 }
 
-window.deleteReview = async function(id) {
-    if (!confirm('Delete this review?')) return;
+// ============ DELETE REVIEW ============
+window.deleteReview = async function(reviewId) {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+    
     try {
-        await deleteDoc(doc(db, COLLECTIONS.REVIEWS, id));
-        showToast('✅ Review deleted');
+        await deleteDoc(doc(db, 'reviews', reviewId));
+        showToast('✅ Review deleted!');
         loadReviews();
     } catch (error) {
-        showToast('❌ Error deleting', 'error');
+        showToast('❌ Error deleting review');
     }
 };
 
-log.success('Admin script ready!');
+// ============ FILTER ORDERS ============
+window.filterOrders = function() {
+    loadOrders();
+};
+
+console.log('✅ Admin script ready!');
