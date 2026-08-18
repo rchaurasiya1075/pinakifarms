@@ -580,7 +580,23 @@ header {
     background: #1e3d1a;
 }
 
-/* Auth Modal */
+/* Auth Modal - Additional CSS */
+.auth-form-container {
+    display: none;
+}
+
+.auth-form-container.active {
+    display: block;
+}
+
+.auth-form-container h3 {
+    color: #2d5a27;
+    margin-bottom: 25px;
+    font-size: 24px;
+    text-align: center;
+}
+
+/* Make sure modal is above everything */
 .auth-modal {
     position: fixed;
     top: 0;
@@ -588,7 +604,7 @@ header {
     right: 0;
     bottom: 0;
     background: rgba(0,0,0,0.6);
-    z-index: 1001;
+    z-index: 99999;
     display: none;
     align-items: center;
     justify-content: center;
@@ -609,6 +625,7 @@ header {
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    z-index: 100000;
 }
 
 .auth-close {
@@ -633,48 +650,6 @@ header {
     color: #fff;
 }
 
-.auth-form {
-    display: none;
-}
-
-.auth-form.active {
-    display: block;
-}
-
-.auth-form h3 {
-    color: #2d5a27;
-    margin-bottom: 25px;
-    font-size: 24px;
-    text-align: center;
-}
-
-.auth-form .form-group {
-    margin-bottom: 18px;
-}
-
-.auth-form .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #333;
-    font-size: 14px;
-}
-
-.auth-form .form-group input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 15px;
-    transition: border-color 0.3s;
-    box-sizing: border-box;
-}
-
-.auth-form .form-group input:focus {
-    outline: none;
-    border-color: #2d5a27;
-}
-
 .auth-submit {
     width: 100%;
     padding: 14px;
@@ -693,6 +668,34 @@ header {
     background: #1e3d1a;
 }
 
+.auth-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d5a27;
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 10px;
+    z-index: 999999;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-width: 90%;
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
 /* Toast Notification */
 .toast {
     position: fixed;
