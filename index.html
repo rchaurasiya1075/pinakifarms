@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pinaki Farms - Pure & Organic Farm Products</title>
+    <title>Pinaki Farms - Pure Ghee, Oils & Pickles</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
@@ -11,7 +11,7 @@
     <!-- Top Info Bar -->
     <div class="top-info-bar">
         <div class="container">
-            <span>🌿 100% Organic & Pure</span>
+            <span>🌿 100% Pure & Natural</span>
             <span>📞 +91 98765 43210</span>
             <span>🚚 Free Delivery on Orders ₹500+</span>
         </div>
@@ -44,6 +44,9 @@
                 <button class="auth-toggle" onclick="toggleAuth()">
                     <i class="fas fa-user"></i>
                 </button>
+                <button class="admin-link" onclick="window.location.href='admin-login.html'" title="Admin Panel">
+                    <i class="fas fa-user-shield"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -60,8 +63,8 @@
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
-                <h1>Pure & Organic Farm Fresh Products</h1>
-                <p>Directly from our farms to your doorstep. 100% natural, chemical-free, and sustainably grown.</p>
+                <h1>Pure Ghee • Cold Pressed Oils • Homemade Pickles</h1>
+                <p>Traditional, chemical-free, and made with love. Directly from our farm to your kitchen.</p>
                 <button class="cta-button" onclick="scrollToProducts()">Shop Now</button>
             </div>
         </div>
@@ -70,16 +73,12 @@
     <!-- Products Section -->
     <section class="products" id="products">
         <div class="container">
-            <h2>Our Products</h2>
+            <h2>Our Premium Products</h2>
             <div class="category-filters">
                 <button class="filter-btn active" onclick="filterProducts('all')">All</button>
-                <button class="filter-btn" onclick="filterProducts('vegetables')">Vegetables</button>
-                <button class="filter-btn" onclick="filterProducts('fruits')">Fruits</button>
-                <button class="filter-btn" onclick="filterProducts('grains')">Grains</button>
-                <button class="filter-btn" onclick="filterProducts('dairy')">Dairy</button>
-                <button class="filter-btn" onclick="filterProducts('ghee')">Ghee</button>
-                <button class="filter-btn" onclick="filterProducts('oil')">Oils</button>
-                <button class="filter-btn" onclick="filterProducts('achar')">Pickles</button>
+                <button class="filter-btn" onclick="filterProducts('ghee')">Pure Ghee</button>
+                <button class="filter-btn" onclick="filterProducts('oil')">Cold Pressed Oils</button>
+                <button class="filter-btn" onclick="filterProducts('achar')">Homemade Pickles</button>
             </div>
             <div class="product-grid" id="productGrid"></div>
         </div>
@@ -91,13 +90,13 @@
             <h2>Our Story</h2>
             <div class="story-content">
                 <div class="story-text">
-                    <h3>From Farm to Table</h3>
-                    <p>Pinaki Farms was born from a simple idea - to provide pure, organic, and healthy farm products to every household. We believe in sustainable farming practices that respect nature and produce the finest quality food.</p>
+                    <h3>Tradition Meets Purity</h3>
+                    <p>Pinaki Farms is dedicated to bringing you the finest traditional products. Our ghee is made using the ancient bilona method, oils are cold-pressed to preserve nutrients, and pickles are prepared with homemade recipes passed down through generations.</p>
                     <ul>
-                        <li>🌱 100% Organic Farming</li>
-                        <li>💧 Pure Water Irrigation</li>
-                        <li>🌿 No Chemicals or Pesticides</li>
-                        <li>🚜 Family-Owned Since 1985</li>
+                        <li>🧈 Traditional Bilona Ghee</li>
+                        <li>🫒 Cold Pressed Oils</li>
+                        <li>🥒 Homemade Pickles</li>
+                        <li>🌿 100% Chemical Free</li>
                     </ul>
                 </div>
                 <div class="story-image">
@@ -158,7 +157,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal - FIXED -->
+    <!-- Auth Modal -->
     <div class="auth-modal" id="authModal">
         <div class="auth-content">
             <button class="auth-close" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
@@ -166,7 +165,6 @@
                 <i class="fas fa-leaf"></i> Welcome to Pinaki Farms
             </h2>
             
-            <!-- Login Form Container -->
             <div id="loginFormContainer" class="auth-form-container active">
                 <form id="loginForm" onsubmit="return handleLogin(event)">
                     <h3>Login to Your Account</h3>
@@ -186,7 +184,6 @@
                 </form>
             </div>
             
-            <!-- Signup Form Container -->
             <div id="signupFormContainer" class="auth-form-container">
                 <form id="signupForm" onsubmit="return handleSignup(event)">
                     <h3>Create New Account</h3>
@@ -222,7 +219,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>Pinaki Farms</h4>
-                    <p>Pure & Organic Farm Products</p>
+                    <p>Pure Ghee • Oils • Pickles</p>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
@@ -250,7 +247,7 @@
         <button onclick="scrollToSection('home')"><i class="fas fa-home"></i><span>Home</span></button>
         <button onclick="scrollToSection('products')"><i class="fas fa-store"></i><span>Shop</span></button>
         <button onclick="toggleCart()"><i class="fas fa-shopping-cart"></i><span>Cart</span></button>
-        <button onclick="toggleAuth()"><i class="fas fa-user"></i><span>Account</span></button>
+        <button onclick="window.location.href='dashboard.html'"><i class="fas fa-user"></i><span>Account</span></button>
     </div>
 
     <script type="module" src="script.js"></script>
