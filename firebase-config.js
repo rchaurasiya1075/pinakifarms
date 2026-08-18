@@ -27,6 +27,7 @@ import {
     persistentMultipleTabManager
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBYy7OfmGGfnRllOcRvgjtClr0T845kqAA",
@@ -41,7 +42,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ============ FIRESTORE WITH OFFLINE PERSISTENCE ============
+// ============ FIRESTORE WITH OFFLINE ============
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()
@@ -74,6 +75,10 @@ export {
     onSnapshot,
     getDoc
 };
+
+// Storage Exports
+export const storage = getStorage(app);
+export { getStorage };
 
 // Database Exports
 export const database = getDatabase(app);
