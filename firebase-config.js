@@ -17,7 +17,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Export ONLY these - no analytics
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const database = getDatabase(app);
