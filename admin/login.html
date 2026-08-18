@@ -117,7 +117,7 @@
             <form id="adminLoginForm">
                 <div class="form-group">
                     <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" id="adminEmail" placeholder="admin@pinakifarms.com" required autocomplete="email" />
+                    <input type="email" id="adminEmail" placeholder="admin@pinakifarms.com" required autocomplete="email" value="admin@pinakifarms.com" />
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
@@ -134,7 +134,6 @@
     </div>
 
     <script type="module">
-        // ============ IMPORTS ============
         import { 
             auth, 
             signInWithEmailAndPassword, 
@@ -144,11 +143,13 @@
             collection,
             query,
             where,
-            getDocs
+            getDocs,
+            addDoc
         } from '../firebase-config.js';
 
-        console.log('✅ Admin Login page loaded');
+        console.log('✅ Admin Login loaded');
 
+        const ADMIN_EMAIL = 'admin@pinakifarms.com';
         const form = document.getElementById('adminLoginForm');
         const emailInput = document.getElementById('adminEmail');
         const passwordInput = document.getElementById('adminPassword');
@@ -156,59 +157,37 @@
         const successDiv = document.getElementById('loginSuccess');
         const loginBtn = document.getElementById('loginBtn');
 
-        // ============ ADMIN EMAIL (Hardcoded for verification) ============
-        const ADMIN_EMAIL = 'admin@pinakifarms.com';
-
-        // ============ CHECK IF ALREADY LOGGED IN ============
+        // ============ CHECK ALREADY LOGGED IN ============
         onAuthStateChanged(auth, async (user) => {
-            console.log('👤 Auth state changed:', user ? 'Logged in' : 'Logged out');
-            
             if (user) {
-                console.log('👤 User email:', user.email);
+                console.log('👤 User found:', user.email);
                 
-                // Check if user is admin
                 if (user.email === ADMIN_EMAIL) {
-                    console.log('✅ Email matches admin email');
-                    
                     try {
-                        // Check Firestore admins collection
                         const q = query(collection(db, 'admins'), where('email', '==', user.email));
-                        const querySnapshot = await getDocs(q);
+                        const snapshot = await getDocs(q);
                         
-                        console.log('📊 Admin docs found:', querySnapshot.size);
-                        
-                        if (!querySnapshot.empty) {
-                            console.log('✅ Admin verified! Redirecting to dashboard...');
-                            // Redirect to dashboard
-                            window.location.replace('dashboard.html');
-                            return;
-                        } else {
-                            console.log('❌ Admin not found in Firestore admins collection');
-                            // Create admin document if missing
-                            try {
-                                await addDoc(collection(db, 'admins'), {
-                                    email: user.email,
-                                    name: 'Admin',
-                                    role: 'admin',
-                                    createdAt: new Date().toISOString()
-                                });
-                                console.log('✅ Admin document created! Redirecting...');
-                                window.location.replace('dashboard.html');
-                                return;
-                            } catch (err) {
-                                console.error('Failed to create admin doc:', err);
-                            }
+                        if (snapshot.empty) {
+                            await addDoc(collection(db, 'admins'), {
+                                email: user.email,
+                                name: 'Admin',
+                                role: 'admin',
+                                createdAt: new Date().toISOString()
+                            });
+                            console.log('✅ Admin document created');
                         }
+                        
+                        console.log('✅ Admin verified, redirecting...');
+                        window.location.href = 'dashboard.html';
+                        return;
                     } catch (error) {
-                        console.error('❌ Error checking admin:', error);
+                        console.error('Error:', error);
                     }
                 } else {
-                    console.log('❌ User is not admin, logging out...');
+                    console.log('❌ Not admin email');
                     await signOut(auth);
                     window.location.reload();
                 }
-            } else {
-                console.log('👤 No user logged in');
             }
         });
 
@@ -216,15 +195,17 @@
         function showToast(message, type = 'success') {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
+            
             const toast = document.createElement('div');
-            toast.className = 'toast ' + type;
+            toast.className = `toast ${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
+            
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            }, 3000);
         }
 
         // ============ HANDLE LOGIN ============
@@ -234,12 +215,8 @@
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             
-            console.log('🔑 Login attempt for:', email);
-            
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
-            errorDiv.textContent = '';
-            successDiv.textContent = '';
             
             if (!email || !password) {
                 errorDiv.textContent = '⚠️ Please fill all fields';
@@ -247,9 +224,8 @@
                 return;
             }
             
-            // Check if email is admin email
             if (email !== ADMIN_EMAIL) {
-                errorDiv.textContent = '❌ Only admin@pinakifarms.com can login as admin';
+                errorDiv.textContent = '❌ Invalid admin email';
                 errorDiv.style.display = 'block';
                 return;
             }
@@ -258,63 +234,45 @@
             loginBtn.disabled = true;
             
             try {
-                console.log('🔐 Signing in...');
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                console.log('✅ Login successful:', user.email);
+                console.log('✅ Login success:', userCredential.user.email);
                 
-                // Check if user is admin
-                const q = query(collection(db, 'admins'), where('email', '==', user.email));
-                const querySnapshot = await getDocs(q);
+                // Create admin doc if not exists
+                const q = query(collection(db, 'admins'), where('email', '==', email));
+                const snapshot = await getDocs(q);
                 
-                console.log('📊 Admin docs found:', querySnapshot.size);
-                
-                // If no admin doc, create one
-                if (querySnapshot.empty) {
-                    console.log('📝 Creating admin document...');
-                    try {
-                        await addDoc(collection(db, 'admins'), {
-                            email: user.email,
-                            name: 'Admin',
-                            role: 'admin',
-                            createdAt: new Date().toISOString()
-                        });
-                        console.log('✅ Admin document created!');
-                    } catch (err) {
-                        console.error('Failed to create admin doc:', err);
-                    }
+                if (snapshot.empty) {
+                    await addDoc(collection(db, 'admins'), {
+                        email: email,
+                        name: 'Admin',
+                        role: 'admin',
+                        createdAt: new Date().toISOString()
+                    });
+                    console.log('✅ Admin doc created');
                 }
                 
                 successDiv.textContent = '✅ Welcome Admin! Redirecting...';
                 successDiv.style.display = 'block';
-                showToast('✅ Welcome Admin!', 'success');
+                showToast('✅ Welcome Admin!');
                 
                 setTimeout(() => {
-                    window.location.replace('dashboard.html');
+                    window.location.href = 'dashboard.html';
                 }, 1000);
                 
             } catch (error) {
-                console.error('❌ Login error:', error);
-                let errorMsg = '❌ Login failed. ';
-                switch(error.code) {
-                    case 'auth/user-not-found': errorMsg += 'Admin account not found.';
-                        break;
-                    case 'auth/wrong-password': errorMsg += 'Incorrect password.';
-                        break;
-                    case 'auth/invalid-email': errorMsg += 'Invalid email.';
-                        break;
-                    case 'auth/too-many-requests': errorMsg += 'Too many attempts. Try later.';
-                        break;
-                    default: errorMsg += error.message;
-                }
-                errorDiv.textContent = errorMsg;
+                console.error('Login error:', error);
+                let msg = '❌ Login failed. ';
+                if (error.code === 'auth/user-not-found') msg += 'Account not found.';
+                else if (error.code === 'auth/wrong-password') msg += 'Wrong password.';
+                else msg += error.message;
+                
+                errorDiv.textContent = msg;
                 errorDiv.style.display = 'block';
                 loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
                 loginBtn.disabled = false;
             }
         });
 
-        console.log('✅ Admin Login ready!');
         console.log('🔑 Use: admin@pinakifarms.com / Admin@123456');
     </script>
 </body>
