@@ -1,9 +1,19 @@
-// script.js - TOP PART FIXED
+// script.js - COMPLETE FIXED
 import { 
-    db, auth,
-    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot,
-    createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut
+    db, auth
 } from './firebase-config.js';
+
+// Import Firestore functions directly from CDN
+import { 
+    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot, getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 console.log('✅ Script loaded successfully!');
 
@@ -29,7 +39,6 @@ const searchBar = document.getElementById('searchBar');
 const searchInput = document.getElementById('searchInput');
 
 console.log('✅ DOM elements loaded');
-console.log('Auth Modal:', authModal);
 
 // ============= INIT =============
 document.addEventListener('DOMContentLoaded', function() {
@@ -41,9 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadReviews();
 });
 
-// ============= AUTH FUNCTIONS - FIXED =============
+// ============= AUTH FUNCTIONS =============
 
-// Toggle Auth Modal - FIXED
+// Toggle Auth Modal - GLOBAL
 window.toggleAuth = function() {
     console.log('🔑 Toggle auth called');
     if (authModal) {
@@ -52,11 +61,10 @@ window.toggleAuth = function() {
         console.log('Auth modal active:', authModal.classList.contains('active'));
     } else {
         console.error('❌ Auth modal not found!');
-        alert('Auth modal not found! Please refresh the page.');
     }
 }
 
-// Close Auth Modal - FIXED
+// Close Auth Modal - GLOBAL
 window.closeAuthModal = function() {
     console.log('❌ Close auth called');
     if (authModal) {
@@ -65,7 +73,7 @@ window.closeAuthModal = function() {
     }
 }
 
-// Show Signup Form - FIXED
+// Show Signup Form - GLOBAL
 window.showSignupForm = function() {
     console.log('📝 Show signup form');
     const loginContainer = document.getElementById('loginFormContainer');
@@ -73,12 +81,11 @@ window.showSignupForm = function() {
     if (loginContainer && signupContainer) {
         loginContainer.classList.remove('active');
         signupContainer.classList.add('active');
-    } else {
-        console.error('❌ Form containers not found!');
     }
+    return false;
 }
 
-// Show Login Form - FIXED
+// Show Login Form - GLOBAL
 window.showLoginForm = function() {
     console.log('🔐 Show login form');
     const loginContainer = document.getElementById('loginFormContainer');
@@ -86,12 +93,11 @@ window.showLoginForm = function() {
     if (loginContainer && signupContainer) {
         signupContainer.classList.remove('active');
         loginContainer.classList.add('active');
-    } else {
-        console.error('❌ Form containers not found!');
     }
+    return false;
 }
 
-// ============= HANDLE LOGIN - FIXED =============
+// ============= HANDLE LOGIN - GLOBAL =============
 window.handleLogin = async function(event) {
     event.preventDefault();
     console.log('🔑 Login form submitted');
@@ -118,7 +124,7 @@ window.handleLogin = async function(event) {
         });
         
         showToast('🎉 Welcome back, ' + (state.currentUserData?.name || 'User') + '!');
-        closeAuthModal();
+        window.closeAuthModal();
         document.getElementById('loginForm').reset();
         updateUserUI();
         return false;
@@ -140,7 +146,7 @@ window.handleLogin = async function(event) {
     }
 }
 
-// ============= HANDLE SIGNUP - FIXED =============
+// ============= HANDLE SIGNUP - GLOBAL =============
 window.handleSignup = async function(event) {
     event.preventDefault();
     console.log('📝 Signup form submitted');
@@ -180,7 +186,7 @@ window.handleSignup = async function(event) {
         state.currentUserData = userData;
         
         showToast('🎉 Account created! Welcome ' + name + '!');
-        closeAuthModal();
+        window.closeAuthModal();
         document.getElementById('signupForm').reset();
         updateUserUI();
         return false;
@@ -202,7 +208,7 @@ window.handleSignup = async function(event) {
     }
 }
 
-// ============= LOGOUT =============
+// ============= LOGOUT - GLOBAL =============
 window.logout = async function() {
     console.log('🚪 Logout called');
     try {
@@ -266,13 +272,13 @@ function updateUserUI() {
         authBtn.onclick = function(e) {
             e.preventDefault();
             if (confirm('Are you sure you want to logout?')) {
-                logout();
+                window.logout();
             }
         };
     } else {
         authBtn.innerHTML = `<i class="fas fa-user"></i>`;
         authBtn.title = 'Login / Signup';
-        authBtn.onclick = toggleAuth;
+        authBtn.onclick = window.toggleAuth;
         
         const userDisplay = document.querySelector('.user-display');
         if (userDisplay) userDisplay.remove();
@@ -334,7 +340,7 @@ function renderProducts() {
                     ${product.originalPrice ? `<span class="product-original">₹${product.originalPrice}</span>` : ''}
                 </div>
                 ${product.inStock !== false ? `
-                    <button class="add-to-cart" onclick="addToCart('${product.id}')">
+                    <button class="add-to-cart" onclick="window.addToCart('${product.id}')">
                         <i class="fas fa-plus"></i> Add to Cart
                     </button>
                 ` : `
@@ -342,10 +348,10 @@ function renderProducts() {
                 `}
                 ${isAdmin ? `
                     <div style="margin-top:10px;display:flex;gap:5px;">
-                        <button onclick="editProduct('${product.id}')" style="flex:1;padding:5px;background:#3498db;color:#fff;border:none;border-radius:3px;cursor:pointer;">
+                        <button onclick="window.editProduct('${product.id}')" style="flex:1;padding:5px;background:#3498db;color:#fff;border:none;border-radius:3px;cursor:pointer;">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button onclick="deleteProduct('${product.id}')" style="flex:1;padding:5px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;">
+                        <button onclick="window.deleteProduct('${product.id}')" style="flex:1;padding:5px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
@@ -355,8 +361,7 @@ function renderProducts() {
     `).join('');
 }
 
-// ============= OTHER FUNCTIONS =============
-
+// ============= OTHER FUNCTIONS - GLOBAL =============
 window.filterProducts = function(category) {
     state.currentFilter = category;
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -382,8 +387,7 @@ window.scrollToSection = function(id) {
     document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
 }
 
-// ============= CART FUNCTIONS =============
-
+// ============= CART FUNCTIONS - GLOBAL =============
 window.addToCart = function(productId) {
     const product = state.products.find(p => p.id === productId);
     if (!product) return;
@@ -393,7 +397,7 @@ window.addToCart = function(productId) {
     }
     if (!state.currentUser) {
         showToast('Please login to add items!');
-        toggleAuth();
+        window.toggleAuth();
         return;
     }
     
@@ -420,7 +424,7 @@ window.updateQuantity = function(productId, change) {
     if (!item) return;
     item.quantity += change;
     if (item.quantity <= 0) {
-        removeFromCart(productId);
+        window.removeFromCart(productId);
         return;
     }
     saveCartToLocal();
@@ -444,12 +448,12 @@ function updateCartUI() {
                 <h4>${item.name}</h4>
                 <p>₹${item.price} × ${item.quantity} = ₹${item.price * item.quantity}</p>
                 <div style="display:flex;gap:10px;margin-top:5px;">
-                    <button onclick="updateQuantity('${item.id}', -1)" style="background:#eee;border:none;padding:2px 10px;border-radius:3px;cursor:pointer;">-</button>
+                    <button onclick="window.updateQuantity('${item.id}', -1)" style="background:#eee;border:none;padding:2px 10px;border-radius:3px;cursor:pointer;">-</button>
                     <span>${item.quantity}</span>
-                    <button onclick="updateQuantity('${item.id}', 1)" style="background:#eee;border:none;padding:2px 10px;border-radius:3px;cursor:pointer;">+</button>
+                    <button onclick="window.updateQuantity('${item.id}', 1)" style="background:#eee;border:none;padding:2px 10px;border-radius:3px;cursor:pointer;">+</button>
                 </div>
             </div>
-            <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">
+            <button class="cart-item-remove" onclick="window.removeFromCart('${item.id}')">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -471,7 +475,7 @@ window.checkout = function() {
     }
     if (!state.currentUser) {
         showToast('Please login first');
-        toggleAuth();
+        window.toggleAuth();
         return;
     }
     
@@ -484,7 +488,7 @@ window.checkout = function() {
     state.cart = [];
     saveCartToLocal();
     updateCartUI();
-    toggleCart();
+    window.toggleCart();
 }
 
 function saveCartToLocal() {
@@ -497,7 +501,6 @@ function loadCartFromLocal() {
 }
 
 // ============= REVIEWS =============
-
 async function loadReviews() {
     try {
         const querySnapshot = await getDocs(collection(db, 'reviews'));
@@ -527,7 +530,6 @@ function renderReviews(reviews) {
 }
 
 // ============= CONTACT =============
-
 window.submitContact = async function(event) {
     event.preventDefault();
     const form = event.target;
@@ -548,7 +550,6 @@ window.submitContact = async function(event) {
 }
 
 // ============= TOAST =============
-
 function showToast(message) {
     const existing = document.querySelector('.toast');
     if (existing) existing.remove();
@@ -565,8 +566,7 @@ function showToast(message) {
     }, 3000);
 }
 
-// ============= ADMIN FUNCTIONS =============
-
+// ============= ADMIN FUNCTIONS - GLOBAL =============
 window.deleteProduct = async function(productId) {
     if (!confirm('Delete this product?')) return;
     try {
