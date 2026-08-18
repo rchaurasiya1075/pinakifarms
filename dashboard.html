@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Pinaki Farms</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>Pinaki Farms</span>
+                </a>
+                <span class="dashboard-title">| My Dashboard</span>
+            </div>
+            <div class="header-right">
+                <span class="user-welcome" id="userWelcome">Welcome, User!</span>
+                <button onclick="logoutUser()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Main -->
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Sidebar -->
+                <aside class="dashboard-sidebar">
+                    <div class="user-profile-card">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3 id="userName">User Name</h3>
+                        <p id="userEmail">user@email.com</p>
+                        <span class="user-role">Customer</span>
+                    </div>
+                    
+                    <nav class="dashboard-nav">
+                        <a href="dashboard.html" class="active">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <a href="order-history.html">
+                            <i class="fas fa-shopping-bag"></i> Order History
+                        </a>
+                        <a href="payment-history.html">
+                            <i class="fas fa-credit-card"></i> Payment History
+                        </a>
+                        <a href="profile.html">
+                            <i class="fas fa-user-cog"></i> Profile Settings
+                        </a>
+                        <a href="index.html">
+                            <i class="fas fa-store"></i> Continue Shopping
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="dashboard-main">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalOrders">0</h3>
+                                <p>Total Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-rupee-sign"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalSpent">₹0</h3>
+                                <p>Total Spent</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="pendingOrders">0</h3>
+                                <p>Pending Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="completedOrders">0</h3>
+                                <p>Completed Orders</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="recent-orders">
+                        <div class="section-header">
+                            <h3><i class="fas fa-history"></i> Recent Orders</h3>
+                            <a href="order-history.html">View All →</a>
+                        </div>
+                        <div class="orders-table-wrapper">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align:center;padding:40px;">
+                                            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                        <div class="action-buttons">
+                            <a href="index.html#products" class="action-btn primary">
+                                <i class="fas fa-plus"></i> New Order
+                            </a>
+                            <a href="order-history.html" class="action-btn secondary">
+                                <i class="fas fa-list"></i> View Orders
+                            </a>
+                            <a href="profile.html" class="action-btn secondary">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="dashboard-script.js"></script>
+</body>
+</html>
