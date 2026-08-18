@@ -158,57 +158,61 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Auth Modal - FIXED -->
     <div class="auth-modal" id="authModal">
         <div class="auth-content">
-            <button class="auth-close" onclick="closeAuth()"><i class="fas fa-times"></i></button>
+            <button class="auth-close" onclick="closeAuthModal()"><i class="fas fa-times"></i></button>
             <h2 style="text-align:center;color:#2d5a27;margin-bottom:20px;">
                 <i class="fas fa-leaf"></i> Welcome to Pinaki Farms
             </h2>
             
-            <!-- Login Form -->
-            <form id="loginForm" onsubmit="handleLogin(event)" class="auth-form active">
-                <h3>Login</h3>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="loginEmail" placeholder="Enter your email" required />
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" required />
-                </div>
-                <button type="submit" class="auth-submit">Login</button>
-                <p style="text-align:center;margin-top:15px;">
-                    Don't have an account? 
-                    <a href="#" onclick="switchToSignup()" style="color:#2d5a27;font-weight:bold;">Sign Up</a>
-                </p>
-            </form>
+            <!-- Login Form Container -->
+            <div id="loginFormContainer" class="auth-form-container active">
+                <form id="loginForm" onsubmit="return handleLogin(event)">
+                    <h3>Login to Your Account</h3>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                    </div>
+                    <button type="submit" class="auth-submit">Login</button>
+                    <p style="text-align:center;margin-top:15px;">
+                        Don't have an account? 
+                        <a href="#" onclick="showSignupForm(); return false;" style="color:#2d5a27;font-weight:bold;cursor:pointer;">Sign Up</a>
+                    </p>
+                </form>
+            </div>
             
-            <!-- Signup Form -->
-            <form id="signupForm" onsubmit="handleSignup(event)" class="auth-form">
-                <h3>Create Account</h3>
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="signupName" placeholder="Enter your full name" required />
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="signupEmail" placeholder="Enter your email" required />
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="signupPassword" placeholder="Create a password (min 6 chars)" required minlength="6" />
-                </div>
-                <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="tel" id="signupPhone" placeholder="Enter your phone number" />
-                </div>
-                <button type="submit" class="auth-submit">Create Account</button>
-                <p style="text-align:center;margin-top:15px;">
-                    Already have an account? 
-                    <a href="#" onclick="switchToLogin()" style="color:#2d5a27;font-weight:bold;">Login</a>
-                </p>
-            </form>
+            <!-- Signup Form Container -->
+            <div id="signupFormContainer" class="auth-form-container">
+                <form id="signupForm" onsubmit="return handleSignup(event)">
+                    <h3>Create New Account</h3>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signupName" placeholder="Enter your full name" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="signupEmail" placeholder="Enter your email" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signupPassword" placeholder="Create a password (min 6 chars)" required minlength="6" />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="signupPhone" placeholder="Enter your phone number" />
+                    </div>
+                    <button type="submit" class="auth-submit">Create Account</button>
+                    <p style="text-align:center;margin-top:15px;">
+                        Already have an account? 
+                        <a href="#" onclick="showLoginForm(); return false;" style="color:#2d5a27;font-weight:bold;cursor:pointer;">Login</a>
+                    </p>
+                </form>
+            </div>
         </div>
     </div>
 
