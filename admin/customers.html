@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Customers - Admin Panel</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-logo">
+                <i class="fas fa-leaf"></i>
+                <span>Pinaki Farms Admin</span>
+            </div>
+            <div class="admin-header-right">
+                <span id="adminName">Admin</span>
+                <button onclick="logoutAdmin()" class="admin-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-body">
+        <div class="admin-container">
+            <aside class="admin-sidebar">
+                <nav class="admin-nav">
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="products.html"><i class="fas fa-box"></i> Products</a>
+                    <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
+                    <a href="customers.html" class="active"><i class="fas fa-users"></i> Customers</a>
+                    <a href="reviews.html"><i class="fas fa-star"></i> Reviews</a>
+                    <a href="../index.html"><i class="fas fa-store"></i> View Website</a>
+                </nav>
+            </aside>
+
+            <main class="admin-main">
+                <h2><i class="fas fa-users"></i> Manage Customers</h2>
+
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Orders</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerList">
+                            <tr><td colspan="5" style="text-align:center;padding:40px;">Loading customers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="../js/admin-script.js"></script>
+</body>
+</html>
