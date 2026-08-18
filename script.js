@@ -1,4 +1,4 @@
-// script.js - COMPLETE FIXED
+// script.js - COMPLETE WITH PRODUCT DETAIL CLICK
 import { 
     db, auth
 } from './firebase-config.js';
@@ -315,6 +315,11 @@ function loadSampleProducts() {
     renderProducts();
 }
 
+// ============= OPEN PRODUCT DETAIL =============
+window.openProductDetail = function(productId) {
+    window.location.href = `product-detail.html?id=${productId}`;
+}
+
 function renderProducts() {
     if (!productGrid) return;
     
@@ -330,7 +335,7 @@ function renderProducts() {
     const isAdmin = state.currentUserRole === 'admin';
     
     productGrid.innerHTML = filtered.map(product => `
-        <div class="product-card">
+        <div class="product-card" onclick="openProductDetail('${product.id}')" style="cursor:pointer;">
             <div class="product-image">${product.emoji || '🌿'}</div>
             <div class="product-info">
                 <span class="purity-badge">${product.purity || 'Pure'}</span>
@@ -340,7 +345,7 @@ function renderProducts() {
                     ${product.originalPrice ? `<span class="product-original">₹${product.originalPrice}</span>` : ''}
                 </div>
                 ${product.inStock !== false ? `
-                    <button class="add-to-cart" onclick="window.addToCart('${product.id}')">
+                    <button class="add-to-cart" onclick="event.stopPropagation(); window.addToCart('${product.id}')">
                         <i class="fas fa-plus"></i> Add to Cart
                     </button>
                 ` : `
@@ -348,10 +353,10 @@ function renderProducts() {
                 `}
                 ${isAdmin ? `
                     <div style="margin-top:10px;display:flex;gap:5px;">
-                        <button onclick="window.editProduct('${product.id}')" style="flex:1;padding:5px;background:#3498db;color:#fff;border:none;border-radius:3px;cursor:pointer;">
+                        <button onclick="event.stopPropagation(); window.editProduct('${product.id}')" style="flex:1;padding:5px;background:#3498db;color:#fff;border:none;border-radius:3px;cursor:pointer;">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button onclick="window.deleteProduct('${product.id}')" style="flex:1;padding:5px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;">
+                        <button onclick="event.stopPropagation(); window.deleteProduct('${product.id}')" style="flex:1;padding:5px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
