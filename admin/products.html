@@ -69,13 +69,12 @@
                                 <th>Name</th>
                                 <th>Category</th>
                                 <th>Price</th>
-                                <th>Original</th>
                                 <th>Stock</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="productList">
-                            <tr><td colspan="7" style="text-align:center;padding:40px;">Loading products...</td></tr>
+                            <tr><td colspan="6" style="text-align:center;padding:40px;">Loading products...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -93,6 +92,7 @@
             <form id="productForm">
                 <input type="hidden" id="productId">
                 
+                <!-- Row 1: Name & Category -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Product Name *</label>
@@ -105,10 +105,12 @@
                             <option value="ghee">Pure Ghee</option>
                             <option value="oil">Cold Pressed Oils</option>
                             <option value="achar">Homemade Pickles</option>
+                            <option value="gud">Gud / Jaggery</option>
                         </select>
                     </div>
                 </div>
 
+                <!-- Row 2: Price & Original Price -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Price (₹) *</label>
@@ -120,6 +122,7 @@
                     </div>
                 </div>
 
+                <!-- Row 3: Emoji & Unit -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Emoji</label>
@@ -131,6 +134,7 @@
                     </div>
                 </div>
 
+                <!-- Row 4: Purity & Stock -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Purity Badge</label>
@@ -145,6 +149,46 @@
                     </div>
                 </div>
 
+                <!-- Row 5: Badge (Best Seller, New, etc.) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Badge</label>
+                        <select id="pBadge">
+                            <option value="">None</option>
+                            <option value="🔥 Best Seller">🔥 Best Seller</option>
+                            <option value="⭐ Premium">⭐ Premium</option>
+                            <option value="🆕 New">🆕 New</option>
+                            <option value="🎯 Limited Edition">🎯 Limited Edition</option>
+                            <option value="🏆 Top Rated">🏆 Top Rated</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <small style="color:#999;">Select a badge to highlight your product</small>
+                    </div>
+                </div>
+
+                <!-- ============ NEW: IMAGE URL FIELD ============ -->
+                <div class="form-group">
+                    <label><i class="fas fa-image"></i> Product Image URL</label>
+                    <input type="url" id="pImage" placeholder="https://drive.google.com/uc?export=view&id=YOUR_IMAGE_ID" />
+                    <small style="color:#999;display:block;margin-top:4px;">
+                        📸 Google Drive: Upload image → Share → "Anyone with link" → Copy link → Use this format: 
+                        <code>https://drive.google.com/uc?export=view&id=YOUR_IMAGE_ID</code>
+                    </small>
+                </div>
+
+                <!-- ============ NEW: VIDEO URL FIELD ============ -->
+                <div class="form-group">
+                    <label><i class="fas fa-video"></i> How It's Made - Video URL (YouTube)</label>
+                    <input type="url" id="pVideo" placeholder="https://www.youtube.com/embed/YOUR_VIDEO_ID" />
+                    <small style="color:#999;display:block;margin-top:4px;">
+                        🎥 YouTube: Upload video → Share → Embed → Copy URL like: 
+                        <code>https://www.youtube.com/embed/VIDEO_ID</code>
+                    </small>
+                </div>
+
+                <!-- Description -->
                 <div class="form-group">
                     <label>Description</label>
                     <textarea id="pDescription" rows="3" placeholder="Product description..."></textarea>
