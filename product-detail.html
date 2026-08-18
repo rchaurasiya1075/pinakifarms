@@ -7,130 +7,279 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Product Detail Page Styles */
-        .product-detail-container {
-            padding: 40px 0;
-            background: #fdf8f0;
-            min-height: calc(100vh - 300px);
+        /* ============================================
+           PRODUCT DETAIL PAGE - COMPLETE ECOMMERCE STYLE
+           ============================================ */
+        
+        /* Reset & Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f0ea; color: #3d2b1f; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* ============ HEADER ============ */
+        .detail-header {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid #c49b2c;
+        }
+        .detail-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+        .detail-header .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a4d2e;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .detail-header .logo i { color: #c49b2c; }
+        .detail-header .header-actions { display: flex; gap: 15px; align-items: center; }
+        .detail-header .header-actions button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #3d2b1f;
+            transition: color 0.3s;
+            position: relative;
+        }
+        .detail-header .header-actions button:hover { color: #c49b2c; }
+        .cart-count-detail {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #b22222;
+            color: #fff;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 11px;
+            min-width: 20px;
+            text-align: center;
         }
 
+        /* ============ BREADCRUMB ============ */
+        .breadcrumb {
+            padding: 15px 0;
+            font-size: 13px;
+            color: #999;
+        }
+        .breadcrumb a {
+            color: #1a4d2e;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .breadcrumb a:hover { color: #c49b2c; }
+        .breadcrumb span { color: #999; }
+
+        /* ============ PRODUCT DETAIL MAIN ============ */
+        .product-detail-main {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
         .product-detail-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 50px;
-            background: #fff;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid #f0e8e0;
         }
 
-        .product-detail-image {
+        /* ============ LEFT - IMAGE SECTION ============ */
+        .product-image-section {
             position: relative;
         }
-
-        .product-detail-image img {
+        .product-image-section .main-image {
             width: 100%;
-            height: 400px;
+            height: 420px;
             object-fit: cover;
             border-radius: 12px;
-            border: 2px solid #c49b2c;
+            border: 2px solid #f0e8e0;
+            background: #fdf8f0;
+            transition: transform 0.3s;
         }
-
-        .product-detail-image .badge {
+        .product-image-section .main-image:hover {
+            transform: scale(1.02);
+        }
+        .product-image-section .badge {
             position: absolute;
             top: 15px;
             left: 15px;
             background: #b22222;
             color: #fff;
-            padding: 5px 15px;
+            padding: 5px 18px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+        .product-image-section .wishlist-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #fff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            color: #999;
+        }
+        .product-image-section .wishlist-btn:hover {
+            background: #b22222;
+            color: #fff;
+            transform: scale(1.1);
+        }
+        .product-image-section .share-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .product-image-section .share-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .share-whatsapp { background: #25D366; color: #fff; }
+        .share-whatsapp:hover { background: #1da851; transform: translateY(-2px); }
+        .share-facebook { background: #1877F2; color: #fff; }
+        .share-facebook:hover { background: #0d65d9; transform: translateY(-2px); }
+        .share-twitter { background: #000; color: #fff; }
+        .share-twitter:hover { background: #333; transform: translateY(-2px); }
+        .share-copy { background: #f0e8e0; color: #3d2b1f; }
+        .share-copy:hover { background: #e0d5c8; transform: translateY(-2px); }
 
-        .product-detail-info h1 {
-            font-size: 32px;
+        /* ============ RIGHT - INFO SECTION ============ */
+        .product-info-section h1 {
+            font-size: 28px;
             color: #1a4d2e;
             margin-bottom: 5px;
         }
-
-        .product-detail-info .category-tag {
+        .product-info-section .category-tag {
             display: inline-block;
-            background: #c49b2c;
-            color: #fff;
-            padding: 3px 15px;
+            background: #1a4d2e;
+            color: #c49b2c;
+            padding: 3px 14px;
             border-radius: 15px;
             font-size: 12px;
-            margin-bottom: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-
-        .product-detail-info .price {
-            font-size: 28px;
+        .product-info-section .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .product-info-section .rating-summary .stars {
+            color: #c49b2c;
+            font-size: 18px;
+        }
+        .product-info-section .rating-summary .avg-rating {
+            font-weight: bold;
+            font-size: 18px;
+            color: #1a4d2e;
+        }
+        .product-info-section .rating-summary .total-reviews {
+            color: #999;
+            font-size: 14px;
+        }
+        .product-info-section .price-section {
+            padding: 15px 0;
+            border-top: 1px solid #f0e8e0;
+            border-bottom: 1px solid #f0e8e0;
+            margin: 15px 0;
+        }
+        .product-info-section .price-section .current-price {
+            font-size: 32px;
             font-weight: bold;
             color: #1a4d2e;
         }
-
-        .product-detail-info .original-price {
-            font-size: 18px;
+        .product-info-section .price-section .original-price {
+            font-size: 20px;
             color: #999;
             text-decoration: line-through;
             margin-left: 15px;
         }
-
-        .product-detail-info .purity-badge {
+        .product-info-section .price-section .discount {
             display: inline-block;
-            background: #1a4d2e;
-            color: #c49b2c;
-            padding: 3px 12px;
+            background: #b22222;
+            color: #fff;
+            padding: 2px 12px;
             border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
         }
-
-        .product-detail-info .description {
-            margin: 20px 0;
+        .product-info-section .purity-badge {
+            display: inline-block;
+            background: #fdf8f0;
+            color: #1a4d2e;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #c49b2c;
+        }
+        .product-info-section .description {
             color: #3d2b1f;
             line-height: 1.8;
+            margin: 15px 0;
+            font-size: 15px;
         }
 
-        .product-detail-info .specs {
-            background: #fdf8f0;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .product-detail-info .specs table {
+        /* ============ SPECS TABLE ============ */
+        .specs-table {
             width: 100%;
             border-collapse: collapse;
+            margin: 15px 0;
+            background: #fdf8f0;
+            border-radius: 10px;
+            overflow: hidden;
         }
-
-        .product-detail-info .specs td {
-            padding: 8px 0;
+        .specs-table td {
+            padding: 10px 15px;
             border-bottom: 1px solid #f0e8e0;
         }
-
-        .product-detail-info .specs td:first-child {
+        .specs-table td:first-child {
             font-weight: 600;
             color: #1a4d2e;
             width: 40%;
         }
+        .specs-table td:last-child { color: #3d2b1f; }
+        .specs-table tr:last-child td { border-bottom: none; }
 
-        .product-detail-info .specs td:last-child {
-            color: #3d2b1f;
-        }
-
-        .product-detail-info .quantity-selector {
+        /* ============ QUANTITY & ACTIONS ============ */
+        .quantity-selector {
             display: flex;
             align-items: center;
             gap: 15px;
             margin: 20px 0;
         }
-
-        .product-detail-info .quantity-selector button {
-            width: 40px;
-            height: 40px;
+        .quantity-selector button {
+            width: 44px;
+            height: 44px;
             border: 2px solid #c49b2c;
             background: #fff;
             border-radius: 50%;
@@ -138,81 +287,84 @@
             cursor: pointer;
             transition: all 0.3s;
             color: #1a4d2e;
+            font-weight: bold;
         }
-
-        .product-detail-info .quantity-selector button:hover {
+        .quantity-selector button:hover {
             background: #c49b2c;
             color: #fff;
         }
-
-        .product-detail-info .quantity-selector span {
-            font-size: 20px;
+        .quantity-selector span {
+            font-size: 22px;
             font-weight: bold;
             color: #1a4d2e;
             min-width: 40px;
             text-align: center;
         }
-
-        .product-detail-info .action-buttons {
+        .action-buttons {
             display: flex;
             gap: 15px;
             margin-top: 20px;
         }
-
-        .product-detail-info .action-buttons .btn-primary {
+        .action-buttons .btn-add-cart {
             flex: 1;
             padding: 14px;
             background: #1a4d2e;
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-
-        .product-detail-info .action-buttons .btn-primary:hover {
-            background: #0d2818;
-        }
-
-        .product-detail-info .action-buttons .btn-secondary {
-            padding: 14px 30px;
+        .action-buttons .btn-add-cart:hover { background: #0d2818; }
+        .action-buttons .btn-buy-now {
+            flex: 1;
+            padding: 14px;
             background: #c49b2c;
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
+        .action-buttons .btn-buy-now:hover { background: #a88020; }
 
-        .product-detail-info .action-buttons .btn-secondary:hover {
-            background: #a88020;
+        /* ============ STOCK STATUS ============ */
+        .stock-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            font-size: 14px;
         }
+        .stock-status .in-stock { color: #2d7d46; font-weight: 600; }
+        .stock-status .out-of-stock { color: #b22222; font-weight: 600; }
 
-        /* Video Section */
+        /* ============ VIDEO SECTION ============ */
         .video-section {
-            margin-top: 40px;
             background: #fff;
-            padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid #f0e8e0;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         }
-
         .video-section h3 {
             color: #1a4d2e;
-            margin-bottom: 20px;
-            font-size: 22px;
+            font-size: 20px;
+            margin-bottom: 15px;
         }
-
-        .video-section h3 i {
-            color: #c49b2c;
-            margin-right: 10px;
-        }
-
+        .video-section h3 i { color: #c49b2c; margin-right: 10px; }
         .video-container {
             position: relative;
             padding-bottom: 56.25%;
@@ -220,7 +372,6 @@
             overflow: hidden;
             border-radius: 12px;
         }
-
         .video-container iframe {
             position: absolute;
             top: 0;
@@ -230,91 +381,110 @@
             border: none;
         }
 
-        /* Reviews Section */
+        /* ============ REVIEWS SECTION ============ */
         .reviews-section {
-            margin-top: 40px;
             background: #fff;
-            padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid #f0e8e0;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         }
-
-        .reviews-section h3 {
-            color: #1a4d2e;
+        .reviews-section .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
             margin-bottom: 20px;
+        }
+        .reviews-section .reviews-header h3 {
+            color: #1a4d2e;
+            font-size: 20px;
+        }
+        .reviews-section .reviews-header h3 i { color: #c49b2c; margin-right: 10px; }
+        .reviews-section .reviews-header .rating-overview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .reviews-section .reviews-header .rating-overview .big-rating {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1a4d2e;
+        }
+        .reviews-section .reviews-header .rating-overview .big-stars {
+            color: #c49b2c;
             font-size: 22px;
         }
-
-        .reviews-section h3 i {
-            color: #c49b2c;
-            margin-right: 10px;
+        .reviews-section .reviews-header .rating-overview .total-reviews-text {
+            color: #999;
+            font-size: 14px;
         }
 
         .review-item {
             border-bottom: 1px solid #f0e8e0;
-            padding: 15px 0;
+            padding: 18px 0;
         }
-
-        .review-item:last-child {
-            border-bottom: none;
-        }
-
+        .review-item:last-child { border-bottom: none; }
         .review-item .review-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 5px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-
         .review-item .review-header .reviewer-name {
             font-weight: 600;
             color: #1a4d2e;
         }
-
         .review-item .review-header .review-date {
             color: #999;
             font-size: 12px;
         }
-
-        .review-item .review-stars {
-            color: #c49b2c;
-            font-size: 16px;
-        }
-
+        .review-item .review-stars { color: #c49b2c; font-size: 16px; }
         .review-item .review-comment {
             color: #3d2b1f;
             margin-top: 5px;
+            line-height: 1.6;
         }
+        .review-item .review-helpful {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #999;
+        }
+        .review-item .review-helpful button {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .review-item .review-helpful button:hover { color: #1a4d2e; }
 
+        /* ============ WRITE REVIEW FORM ============ */
         .review-form {
             margin-top: 25px;
             padding-top: 25px;
             border-top: 2px solid #c49b2c;
         }
-
         .review-form h4 {
             color: #1a4d2e;
+            font-size: 18px;
             margin-bottom: 15px;
         }
-
         .review-form .star-rating {
             display: flex;
             gap: 5px;
-            font-size: 28px;
+            font-size: 30px;
             cursor: pointer;
             margin-bottom: 15px;
         }
-
         .review-form .star-rating i {
             color: #ddd;
             transition: color 0.3s;
         }
-
-        .review-form .star-rating i.active {
-            color: #c49b2c;
-        }
-
+        .review-form .star-rating i.active { color: #c49b2c; }
+        .review-form .star-rating i:hover { color: #c49b2c; }
         .review-form input,
         .review-form textarea {
             width: 100%;
@@ -324,246 +494,282 @@
             margin-bottom: 12px;
             font-size: 14px;
             background: #fdf8f0;
+            transition: border-color 0.3s;
         }
-
         .review-form input:focus,
         .review-form textarea:focus {
             outline: none;
             border-color: #c49b2c;
         }
-
-        .review-form button {
+        .review-form .submit-review-btn {
             padding: 12px 35px;
             background: #c49b2c;
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
             font-size: 15px;
         }
+        .review-form .submit-review-btn:hover { background: #a88020; }
 
-        .review-form button:hover {
-            background: #a88020;
-        }
-
-        /* Related Products */
+        /* ============ RELATED PRODUCTS ============ */
         .related-products {
-            margin-top: 40px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 30px;
         }
-
         .related-products h3 {
             color: #1a4d2e;
-            font-size: 22px;
+            font-size: 20px;
             margin-bottom: 20px;
         }
-
-        .related-products h3 i {
-            color: #c49b2c;
-            margin-right: 10px;
-        }
-
+        .related-products h3 i { color: #c49b2c; margin-right: 10px; }
         .related-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
         }
-
         .related-card {
-            background: #fff;
+            background: #fdf8f0;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            border: 1px solid #f0e8e0;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: all 0.3s;
             text-decoration: none;
             color: inherit;
+            border: 1px solid #f0e8e0;
         }
-
         .related-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
         .related-card .related-image {
-            height: 150px;
-            background: #fdf8f0;
+            height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 50px;
-            color: #1a4d2e;
+            background: #fff;
         }
-
         .related-card .related-info {
             padding: 12px 15px;
+            text-align: center;
         }
-
         .related-card .related-info h4 {
             font-size: 14px;
             color: #1a4d2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
         .related-card .related-info .related-price {
             font-weight: bold;
             color: #1a4d2e;
             font-size: 16px;
         }
 
-        /* Breadcrumb */
-        .breadcrumb {
-            padding: 20px 0;
-            font-size: 14px;
-            color: #999;
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a4d2e;
+            color: #fff;
+            padding: 14px 30px;
+            border-radius: 10px;
+            z-index: 999999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 90%;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+        .toast.show { opacity: 1; }
 
-        .breadcrumb a {
-            color: #1a4d2e;
-            text-decoration: none;
-        }
-
-        .breadcrumb a:hover {
-            color: #c49b2c;
-        }
-
-        .breadcrumb span {
-            color: #999;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 992px) {
             .product-detail-grid {
                 grid-template-columns: 1fr;
-                padding: 20px;
+                gap: 30px;
             }
-
-            .product-detail-image img {
-                height: 250px;
-            }
-
-            .product-detail-info h1 {
-                font-size: 24px;
-            }
-
-            .product-detail-info .action-buttons {
-                flex-direction: column;
-            }
-
-            .related-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .product-image-section .main-image { height: 320px; }
+        }
+        @media (max-width: 768px) {
+            .product-detail-main { padding: 20px; }
+            .product-image-section .main-image { height: 250px; }
+            .product-info-section h1 { font-size: 22px; }
+            .product-info-section .price-section .current-price { font-size: 26px; }
+            .action-buttons { flex-direction: column; }
+            .related-grid { grid-template-columns: repeat(2, 1fr); }
+            .reviews-section .reviews-header { flex-direction: column; align-items: flex-start; }
+            .share-buttons { flex-wrap: wrap; justify-content: center; }
+            .detail-header .container { flex-wrap: wrap; gap: 10px; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .product-detail-main { padding: 15px; }
+            .product-image-section .main-image { height: 200px; }
+            .related-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .specs-table td { padding: 8px 10px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container header-content">
-            <div class="logo">
+
+    <!-- ============ HEADER ============ -->
+    <header class="detail-header">
+        <div class="container">
+            <a href="index.html" class="logo">
                 <i class="fas fa-leaf"></i>
                 <span>Pinaki Farms</span>
-            </div>
-            <nav class="desktop-nav">
-                <a href="index.html">Home</a>
-                <a href="index.html#products">Products</a>
-                <a href="index.html#story">Our Story</a>
-                <a href="index.html#reviews">Reviews</a>
-                <a href="index.html#contact">Contact</a>
-            </nav>
+            </a>
             <div class="header-actions">
-                <button class="cart-toggle" onclick="window.location.href='index.html'">
+                <a href="index.html" style="color:#3d2b1f;text-decoration:none;font-size:14px;">
+                    <i class="fas fa-store"></i> Shop
+                </a>
+                <button onclick="window.location.href='index.html'">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount">0</span>
+                    <span class="cart-count-detail" id="cartCountDetail">0</span>
                 </button>
-                <button class="auth-toggle" onclick="window.location.href='index.html'">
+                <button onclick="window.location.href='index.html'">
                     <i class="fas fa-user"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Product Detail -->
-    <div class="product-detail-container">
+    <!-- ============ MAIN CONTENT ============ -->
+    <div style="padding:20px 0;">
         <div class="container">
+
             <!-- Breadcrumb -->
             <div class="breadcrumb">
-                <a href="index.html">Home</a> / 
-                <a href="index.html#products">Products</a> / 
+                <a href="index.html">Home</a> &gt;
+                <a href="index.html#products">Products</a> &gt;
                 <span id="productNameBreadcrumb">Product Details</span>
             </div>
 
-            <!-- Product Detail Grid -->
-            <div class="product-detail-grid" id="productDetail">
-                <div class="product-detail-image">
-                    <img id="productImage" src="https://placehold.co/600x400/1a4d2e/fdf8f0?text=Product" alt="Product">
-                    <span class="badge" id="productBadge">🔥 Best Seller</span>
-                </div>
-                <div class="product-detail-info">
-                    <span class="category-tag" id="productCategory">Category</span>
-                    <h1 id="productName">Product Name</h1>
-                    <div>
-                        <span class="price" id="productPrice">₹0</span>
-                        <span class="original-price" id="productOriginalPrice">₹0</span>
+            <!-- ============ PRODUCT DETAIL MAIN ============ -->
+            <div class="product-detail-main" id="productDetail">
+                <div class="product-detail-grid">
+
+                    <!-- LEFT - Image Section -->
+                    <div class="product-image-section">
+                        <img id="productImage" class="main-image" src="https://placehold.co/600x400/1a4d2e/fdf8f0?text=Product" alt="Product">
+                        <span class="badge" id="productBadge">🔥 Best Seller</span>
+                        <button class="wishlist-btn" onclick="showToast('❤️ Added to wishlist!')">
+                            <i class="far fa-heart"></i>
+                        </button>
+
+                        <!-- Share Buttons -->
+                        <div class="share-buttons">
+                            <button class="share-whatsapp" onclick="shareProduct('whatsapp')">
+                                <i class="fab fa-whatsapp"></i> Share
+                            </button>
+                            <button class="share-facebook" onclick="shareProduct('facebook')">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="share-twitter" onclick="shareProduct('twitter')">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="share-copy" onclick="shareProduct('copy')">
+                                <i class="fas fa-link"></i> Copy
+                            </button>
+                        </div>
                     </div>
-                    <div style="margin:10px 0;">
-                        <span class="purity-badge" id="productPurity">100% Pure</span>
-                        <span style="margin-left:10px;color:#999;" id="productUnit">500g</span>
-                    </div>
-                    <p class="description" id="productDescription">Product description goes here...</p>
-                    
-                    <div class="specs">
-                        <table>
+
+                    <!-- RIGHT - Info Section -->
+                    <div class="product-info-section">
+                        <span class="category-tag" id="productCategory">Category</span>
+                        <h1 id="productName">Product Name</h1>
+
+                        <!-- Rating Summary -->
+                        <div class="rating-summary">
+                            <span class="avg-rating" id="avgRating">0.0</span>
+                            <span class="stars" id="ratingStars">☆☆☆☆☆</span>
+                            <span class="total-reviews" id="totalReviews">(0 reviews)</span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="price-section">
+                            <span class="current-price" id="productPrice">₹0</span>
+                            <span class="original-price" id="productOriginalPrice">₹0</span>
+                            <span class="discount" id="discountBadge">0% OFF</span>
+                        </div>
+
+                        <!-- Purity & Stock -->
+                        <div>
+                            <span class="purity-badge" id="productPurity">100% Pure</span>
+                            <span style="margin-left:10px;color:#999;font-size:14px;" id="productUnit">500g</span>
+                        </div>
+                        <div class="stock-status">
+                            <span id="stockStatus" class="in-stock">✅ In Stock</span>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="description" id="productDescription">Product description goes here...</p>
+
+                        <!-- Specs Table -->
+                        <table class="specs-table">
                             <tr><td>Product Name</td><td id="specName">-</td></tr>
                             <tr><td>Category</td><td id="specCategory">-</td></tr>
                             <tr><td>Purity</td><td id="specPurity">-</td></tr>
                             <tr><td>Unit</td><td id="specUnit">-</td></tr>
-                            <tr><td>In Stock</td><td id="specStock">-</td></tr>
                             <tr><td>Made In</td><td>Village, India</td></tr>
                         </table>
-                    </div>
 
-                    <div class="quantity-selector">
-                        <button onclick="changeQuantity(-1)">-</button>
-                        <span id="quantityDisplay">1</span>
-                        <button onclick="changeQuantity(1)">+</button>
-                    </div>
+                        <!-- Quantity & Actions -->
+                        <div class="quantity-selector">
+                            <button onclick="changeQuantity(-1)">−</button>
+                            <span id="quantityDisplay">1</span>
+                            <button onclick="changeQuantity(1)">+</button>
+                        </div>
 
-                    <div class="action-buttons">
-                        <button class="btn-primary" onclick="addToCartDetail()">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="btn-secondary" onclick="buyNow()">
-                            <i class="fas fa-bolt"></i> Buy Now
-                        </button>
+                        <div class="action-buttons">
+                            <button class="btn-add-cart" onclick="addToCartDetail()">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <button class="btn-buy-now" onclick="buyNow()">
+                                <i class="fas fa-bolt"></i> Buy Now
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Video Section - How It's Made -->
-            <div class="video-section">
+            <!-- ============ VIDEO SECTION ============ -->
+            <div class="video-section" id="videoSection">
                 <h3><i class="fas fa-play-circle"></i> How It's Made - Traditional Process</h3>
                 <div class="video-container">
-                    <iframe 
-                        id="productVideo"
-                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                        title="How It's Made"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen>
-                    </iframe>
+                    <iframe id="productVideo" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="How It's Made" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
             </div>
 
-            <!-- Reviews Section -->
+            <!-- ============ REVIEWS SECTION ============ -->
             <div class="reviews-section" id="reviewsSection">
-                <h3><i class="fas fa-star"></i> Customer Reviews</h3>
-                <div id="reviewsList">
-                    <p style="color:#999;">No reviews yet. Be the first to review!</p>
+                <div class="reviews-header">
+                    <h3><i class="fas fa-star"></i> Customer Reviews</h3>
+                    <div class="rating-overview">
+                        <span class="big-rating" id="bigRating">0.0</span>
+                        <div>
+                            <div class="big-stars" id="bigStars">☆☆☆☆☆</div>
+                            <span class="total-reviews-text" id="totalReviewsText">0 reviews</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Review Form -->
+                <div id="reviewsList">
+                    <p style="color:#999;text-align:center;padding:20px;">No reviews yet. Be the first to review!</p>
+                </div>
+
+                <!-- Write Review Form -->
                 <div class="review-form" id="reviewForm">
-                    <h4>Write a Review</h4>
+                    <h4>✍️ Write a Review</h4>
                     <div class="star-rating" id="starRating">
                         <i class="fas fa-star" data-value="1" onclick="setRating(1)"></i>
                         <i class="fas fa-star" data-value="2" onclick="setRating(2)"></i>
@@ -574,63 +780,55 @@
                     <input type="text" id="reviewerName" placeholder="Your Name" required>
                     <input type="email" id="reviewerEmail" placeholder="Your Email" required>
                     <textarea id="reviewComment" rows="3" placeholder="Write your review..." required></textarea>
-                    <button onclick="submitReview()">Submit Review</button>
+                    <button class="submit-review-btn" onclick="submitReview()">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
                 </div>
             </div>
 
-            <!-- Related Products -->
+            <!-- ============ RELATED PRODUCTS ============ -->
             <div class="related-products">
                 <h3><i class="fas fa-tags"></i> You May Also Like</h3>
-                <div class="related-grid" id="relatedProducts"></div>
+                <div class="related-grid" id="relatedProducts">
+                    <p style="color:#999;grid-column:1/-1;text-align:center;padding:20px;">Loading related products...</p>
+                </div>
             </div>
+
         </div>
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer style="background:#1a4d2e;color:#fff;padding:30px 0;text-align:center;border-top:3px solid #c49b2c;">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Pinaki Farms</h4>
-                    <p>Pure • Natural • Authentic</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <a href="index.html">Home</a>
-                    <a href="index.html#products">Products</a>
-                    <a href="index.html#story">Our Story</a>
-                </div>
-                <div class="footer-section">
-                    <h4>Follow Us</h4>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Pinaki Farms. All rights reserved.</p>
-            </div>
+            <p style="color:#ccc;">&copy; 2026 Pinaki Farms. Pure • Natural • Authentic</p>
         </div>
     </footer>
 
     <script type="module">
-        // ============ IMPORTS ============
+        // ============================================
+        // IMPORTS
+        // ============================================
         import { db, collection, getDocs, doc, getDoc, addDoc, query, where } from './firebase-config.js';
 
-        // ============ STATE ============
+        // ============================================
+        // STATE
+        // ============================================
         let currentProduct = null;
         let quantity = 1;
         let selectedRating = 0;
+        let allReviews = [];
 
-        // ============ GET PRODUCT ID FROM URL ============
+        // ============================================
+        // GET PRODUCT ID FROM URL
+        // ============================================
         function getProductId() {
             const params = new URLSearchParams(window.location.search);
             return params.get('id');
         }
 
-        // ============ LOAD PRODUCT ============
+        // ============================================
+        // LOAD PRODUCT
+        // ============================================
         async function loadProduct() {
             const productId = getProductId();
             if (!productId) {
@@ -645,8 +843,9 @@
                 if (docSnap.exists()) {
                     currentProduct = { id: docSnap.id, ...docSnap.data() };
                     displayProduct(currentProduct);
-                    loadReviews(productId);
-                    loadRelatedProducts(currentProduct.category);
+                    await loadReviews(productId);
+                    await loadRelatedProducts(currentProduct.category);
+                    updateCartCount();
                 } else {
                     showToast('Product not found');
                 }
@@ -656,9 +855,11 @@
             }
         }
 
-        // ============ DISPLAY PRODUCT ============
+        // ============================================
+        // DISPLAY PRODUCT
+        // ============================================
         function displayProduct(product) {
-            // Image - Google Drive ya placeholder
+            // Image
             const imageUrl = product.image || `https://placehold.co/600x400/1a4d2e/fdf8f0?text=${encodeURIComponent(product.name)}`;
             document.getElementById('productImage').src = imageUrl;
             document.getElementById('productImage').alt = product.name;
@@ -681,36 +882,54 @@
             if (product.originalPrice) {
                 document.getElementById('productOriginalPrice').textContent = `₹${product.originalPrice}`;
                 document.getElementById('productOriginalPrice').style.display = 'inline';
+                const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+                document.getElementById('discountBadge').textContent = `${discount}% OFF`;
             } else {
                 document.getElementById('productOriginalPrice').style.display = 'none';
+                document.getElementById('discountBadge').style.display = 'none';
             }
 
             document.getElementById('productPurity').textContent = product.purity || '100% Pure';
             document.getElementById('productUnit').textContent = product.unit || 'kg';
             document.getElementById('productDescription').textContent = product.description || 'No description available.';
 
+            // Stock
+            const stockEl = document.getElementById('stockStatus');
+            if (product.inStock) {
+                stockEl.textContent = '✅ In Stock';
+                stockEl.className = 'in-stock';
+            } else {
+                stockEl.textContent = '❌ Out of Stock';
+                stockEl.className = 'out-of-stock';
+            }
+
             // Specs
             document.getElementById('specName').textContent = product.name;
             document.getElementById('specCategory').textContent = product.category || 'N/A';
             document.getElementById('specPurity').textContent = product.purity || 'N/A';
             document.getElementById('specUnit').textContent = product.unit || 'N/A';
-            document.getElementById('specStock').textContent = product.inStock ? '✅ In Stock' : '❌ Out of Stock';
 
-            // Video (YouTube)
+            // Video
             const videoUrl = product.video || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
             document.getElementById('productVideo').src = videoUrl;
 
-            // Update cart count
-            updateCartCount();
+            // Hide video section if no video
+            if (!product.video) {
+                document.getElementById('videoSection').style.display = 'none';
+            }
         }
 
-        // ============ QUANTITY ============
+        // ============================================
+        // QUANTITY
+        // ============================================
         window.changeQuantity = function(change) {
             quantity = Math.max(1, quantity + change);
             document.getElementById('quantityDisplay').textContent = quantity;
         };
 
-        // ============ ADD TO CART ============
+        // ============================================
+        // ADD TO CART
+        // ============================================
         window.addToCartDetail = function() {
             if (!currentProduct) return;
             
@@ -725,23 +944,65 @@
             
             localStorage.setItem('pinaki_cart', JSON.stringify(cart));
             updateCartCount();
-            showToast(`${currentProduct.name} added to cart!`);
+            showToast(`✅ ${currentProduct.name} added to cart!`);
         };
 
-        // ============ BUY NOW ============
+        // ============================================
+        // BUY NOW
+        // ============================================
         window.buyNow = function() {
             addToCartDetail();
-            window.location.href = 'index.html';
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
         };
 
-        // ============ UPDATE CART COUNT ============
+        // ============================================
+        // UPDATE CART COUNT
+        // ============================================
         function updateCartCount() {
             const cart = JSON.parse(localStorage.getItem('pinaki_cart') || '[]');
             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cartCount').textContent = count;
+            document.getElementById('cartCountDetail').textContent = count;
         }
 
-        // ============ RATING ============
+        // ============================================
+        // SHARE PRODUCT
+        // ============================================
+        window.shareProduct = function(platform) {
+            if (!currentProduct) return;
+            
+            const url = window.location.href;
+            const text = `Check out ${currentProduct.name} - ₹${currentProduct.price} at Pinaki Farms!`;
+            const encodedText = encodeURIComponent(text);
+            const encodedUrl = encodeURIComponent(url);
+
+            let shareUrl = '';
+            switch(platform) {
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${encodedText}%0A${encodedUrl}`;
+                    break;
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(`${text}\n${url}`).then(() => {
+                        showToast('✅ Link copied to clipboard!');
+                    });
+                    return;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=500');
+            }
+        };
+
+        // ============================================
+        // RATING
+        // ============================================
         window.setRating = function(rating) {
             selectedRating = rating;
             document.querySelectorAll('#starRating i').forEach(star => {
@@ -750,7 +1011,9 @@
             });
         };
 
-        // ============ SUBMIT REVIEW ============
+        // ============================================
+        // SUBMIT REVIEW
+        // ============================================
         window.submitReview = async function() {
             if (!currentProduct) {
                 showToast('Product not loaded');
@@ -762,12 +1025,12 @@
             const comment = document.getElementById('reviewComment').value.trim();
 
             if (!name || !email || !comment) {
-                showToast('Please fill all fields');
+                showToast('⚠️ Please fill all fields');
                 return;
             }
 
             if (selectedRating === 0) {
-                showToast('Please select a rating');
+                showToast('⚠️ Please select a rating');
                 return;
             }
 
@@ -791,37 +1054,62 @@
                     star.classList.remove('active');
                 });
                 
-                loadReviews(currentProduct.id);
+                await loadReviews(currentProduct.id);
             } catch (error) {
                 console.error('Error submitting review:', error);
-                showToast('Error submitting review');
+                showToast('❌ Error submitting review');
             }
         };
 
-        // ============ LOAD REVIEWS ============
+        // ============================================
+        // LOAD REVIEWS
+        // ============================================
         async function loadReviews(productId) {
             try {
                 const q = query(collection(db, 'reviews'), where('productId', '==', productId));
                 const querySnapshot = await getDocs(q);
-                const reviews = [];
+                allReviews = [];
                 querySnapshot.forEach(doc => {
-                    reviews.push({ id: doc.id, ...doc.data() });
+                    allReviews.push({ id: doc.id, ...doc.data() });
                 });
 
+                // Calculate average rating
+                const total = allReviews.length;
+                let sum = 0;
+                allReviews.forEach(r => sum += r.rating);
+                const avg = total > 0 ? (sum / total) : 0;
+
+                // Update rating summary
+                document.getElementById('avgRating').textContent = avg.toFixed(1);
+                document.getElementById('bigRating').textContent = avg.toFixed(1);
+                document.getElementById('totalReviews').textContent = `(${total} reviews)`;
+                document.getElementById('totalReviewsText').textContent = `${total} reviews`;
+
+                // Stars
+                const starsHtml = getStarsHtml(avg);
+                document.getElementById('ratingStars').innerHTML = starsHtml;
+                document.getElementById('bigStars').innerHTML = starsHtml;
+
+                // Reviews list
                 const container = document.getElementById('reviewsList');
-                if (reviews.length === 0) {
-                    container.innerHTML = '<p style="color:#999;">No reviews yet. Be the first to review!</p>';
+                if (total === 0) {
+                    container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No reviews yet. Be the first to review!</p>';
                     return;
                 }
 
-                container.innerHTML = reviews.map(r => `
+                container.innerHTML = allReviews.map(r => `
                     <div class="review-item">
                         <div class="review-header">
                             <span class="reviewer-name">${r.name}</span>
-                            <span class="review-date">${new Date(r.date).toLocaleDateString('en-IN')}</span>
+                            <span class="review-date">${new Date(r.date).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</span>
                         </div>
-                        <div class="review-stars">${'⭐'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                        <div class="review-stars">${getStarsHtml(r.rating)}</div>
                         <div class="review-comment">${r.comment}</div>
+                        <div class="review-helpful">
+                            <button onclick="showToast('Thanks for your feedback!')">
+                                <i class="far fa-thumbs-up"></i> Helpful
+                            </button>
+                        </div>
                     </div>
                 `).join('');
             } catch (error) {
@@ -829,14 +1117,26 @@
             }
         }
 
-        // ============ LOAD RELATED PRODUCTS ============
+        // ============================================
+        // HELPER - GET STARS HTML
+        // ============================================
+        function getStarsHtml(rating) {
+            const full = Math.floor(rating);
+            const half = rating % 1 >= 0.5 ? 1 : 0;
+            const empty = 5 - full - half;
+            return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+        }
+
+        // ============================================
+        // LOAD RELATED PRODUCTS
+        // ============================================
         async function loadRelatedProducts(category) {
             try {
                 const querySnapshot = await getDocs(collection(db, 'products'));
                 const products = [];
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.category === category && data.id !== currentProduct?.id) {
+                    if (data.category === category && doc.id !== currentProduct?.id) {
                         products.push({ id: doc.id, ...data });
                     }
                 });
@@ -846,7 +1146,7 @@
 
                 const container = document.getElementById('relatedProducts');
                 if (shuffled.length === 0) {
-                    container.innerHTML = '<p style="color:#999;">No related products found.</p>';
+                    container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:20px;">No related products found.</p>';
                     return;
                 }
 
@@ -864,7 +1164,9 @@
             }
         }
 
-        // ============ TOAST ============
+        // ============================================
+        // TOAST
+        // ============================================
         function showToast(message) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -881,7 +1183,9 @@
             }, 3000);
         }
 
-        // ============ INIT ============
+        // ============================================
+        // INIT
+        // ============================================
         document.addEventListener('DOMContentLoaded', () => {
             loadProduct();
             updateCartCount();
