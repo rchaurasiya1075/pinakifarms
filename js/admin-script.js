@@ -1,4 +1,4 @@
-// js/admin-script.js - Updated with Image & Video Fields
+// js/admin-script.js - Updated with Multiple Images
 import { 
     auth,
     db,
@@ -176,7 +176,12 @@ async function loadProducts() {
         
         tbody.innerHTML = products.map(p => `
             <tr>
-                <td style="font-size:30px;">${p.emoji || '🌿'}</td>
+                <td>
+                    ${p.images && p.images.length > 0 
+                        ? `<img src="${p.images[0]}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;" />`
+                        : `<span style="font-size:30px;">${p.emoji || '🌿'}</span>`
+                    }
+                </td>
                 <td><strong>${p.name}</strong></td>
                 <td>${p.category}</td>
                 <td><strong>₹${p.price}</strong></td>
@@ -197,6 +202,51 @@ async function loadProducts() {
     }
 }
 
+// ============ ADD IMAGE FIELD ============
+window.addImageField = function() {
+    const container = document.getElementById('imageFields');
+    const row = document.createElement('div');
+    row.className = 'image-input-row';
+    row.style.cssText = 'display:flex;gap:10px;margin-bottom:8px;';
+    row.innerHTML = `
+        <input type="url" class="pImage" placeholder="Image: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
+        <button type="button" onclick="removeImageField(this)" style="background:#e74c3c;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(row);
+};
+
+window.removeImageField = function(btn) {
+    const row = btn.parentElement;
+    if (document.querySelectorAll('.image-input-row').length > 1) {
+        row.remove();
+    } else {
+        showToast('Need at least one image field');
+    }
+};
+
+// ============ GET IMAGE URLS ============
+function getImageUrls() {
+    const inputs = document.querySelectorAll('.pImage');
+    const urls = [];
+    inputs.forEach(input => {
+        const url = input.value.trim();
+        if (url) {
+            // Convert Google Drive link to direct image URL if needed
+            let finalUrl = url;
+            if (url.includes('drive.google.com')) {
+                const match = url.match(/[?&]id=([^&]+)/);
+                if (match) {
+                    finalUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                }
+            }
+            urls.push(finalUrl);
+        }
+    });
+    return urls;
+}
+
 // ============ OPEN ADD PRODUCT ============
 window.openAddProduct = function() {
     const modal = document.getElementById('productModal');
@@ -204,6 +254,18 @@ window.openAddProduct = function() {
     document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productForm').reset();
     document.getElementById('productId').value = '';
+    
+    // Reset image fields
+    const container = document.getElementById('imageFields');
+    container.innerHTML = `
+        <div class="image-input-row" style="display:flex;gap:10px;margin-bottom:8px;">
+            <input type="url" class="pImage" placeholder="Image 1: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
+            <button type="button" onclick="addImageField()" style="background:#2d5a27;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    `;
+    
     modal.classList.add('active');
 };
 
@@ -220,18 +282,19 @@ if (productForm) {
         e.preventDefault();
         
         const id = document.getElementById('productId').value;
+        const images = getImageUrls();
+        
         const data = {
             name: document.getElementById('pName').value.trim(),
             category: document.getElementById('pCategory').value,
             price: parseFloat(document.getElementById('pPrice').value),
             originalPrice: parseFloat(document.getElementById('pOriginalPrice').value) || null,
-            emoji: document.getElementById('pEmoji').value.trim() || '🌿',
+            emoji: '🛒',
             purity: document.getElementById('pPurity').value.trim() || 'Pure',
             unit: document.getElementById('pUnit').value.trim() || 'kg',
             inStock: document.getElementById('pInStock').value === 'true',
             badge: document.getElementById('pBadge').value || '',
-            // ============ NEW: Image & Video URLs ============
-            image: document.getElementById('pImage').value.trim() || '',
+            images: images,
             video: document.getElementById('pVideo').value.trim() || '',
             description: document.getElementById('pDescription').value.trim() || ''
         };
@@ -265,15 +328,40 @@ window.editProduct = async function(productId) {
             document.getElementById('pCategory').value = data.category || '';
             document.getElementById('pPrice').value = data.price || '';
             document.getElementById('pOriginalPrice').value = data.originalPrice || '';
-            document.getElementById('pEmoji').value = data.emoji || '';
-            document.getElementById('pPurity').value = data.purity || '';
             document.getElementById('pUnit').value = data.unit || '';
+            document.getElementById('pPurity').value = data.purity || '';
             document.getElementById('pInStock').value = data.inStock ? 'true' : 'false';
             document.getElementById('pBadge').value = data.badge || '';
-            // ============ NEW: Image & Video URLs ============
-            document.getElementById('pImage').value = data.image || '';
             document.getElementById('pVideo').value = data.video || '';
             document.getElementById('pDescription').value = data.description || '';
+            
+            // Set images
+            const container = document.getElementById('imageFields');
+            container.innerHTML = '';
+            if (data.images && data.images.length > 0) {
+                data.images.forEach((img, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'image-input-row';
+                    row.style.cssText = 'display:flex;gap:10px;margin-bottom:8px;';
+                    row.innerHTML = `
+                        <input type="url" class="pImage" value="${img}" style="flex:1;" />
+                        <button type="button" onclick="removeImageField(this)" style="background:#e74c3c;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    container.appendChild(row);
+                });
+            } else {
+                container.innerHTML = `
+                    <div class="image-input-row" style="display:flex;gap:10px;margin-bottom:8px;">
+                        <input type="url" class="pImage" placeholder="Image 1: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
+                        <button type="button" onclick="addImageField()" style="background:#2d5a27;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                `;
+            }
+            
             document.getElementById('productModal').classList.add('active');
         }
     } catch (error) {
