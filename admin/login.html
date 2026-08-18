@@ -6,6 +6,91 @@
     <title>Admin Login - Pinaki Farms</title>
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Fallback styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .admin-login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a3a16, #2d5a27);
+            padding: 20px;
+        }
+        .admin-login-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            width: 420px;
+            max-width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .admin-login-header { text-align: center; margin-bottom: 30px; }
+        .admin-login-header i { font-size: 50px; color: #2d5a27; }
+        .admin-login-header h2 { color: #333; font-size: 24px; margin-top: 10px; }
+        .admin-login-header p { color: #666; font-size: 14px; }
+        .login-error {
+            background: #fee;
+            color: #e74c3c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333; font-size: 14px; }
+        .form-group label i { color: #2d5a27; width: 20px; }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus { outline: none; border-color: #2d5a27; }
+        .admin-login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2d5a27;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .admin-login-btn:hover { background: #1a3a16; }
+        .admin-login-btn i { margin-right: 8px; }
+        .back-link { text-align: center; margin-top: 15px; }
+        .back-link a { color: #2d5a27; text-decoration: none; font-size: 14px; }
+        .back-link a:hover { text-decoration: underline; }
+        .back-link a i { margin-right: 5px; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d5a27;
+            color: #fff;
+            padding: 14px 30px;
+            border-radius: 10px;
+            z-index: 999999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 90%;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity: 1; }
+        .toast.error { background: #e74c3c; }
+        .toast.success { background: #2d5a27; }
+    </style>
 </head>
 <body>
     <div class="admin-login-container">
@@ -13,19 +98,19 @@
             <div class="admin-login-header">
                 <i class="fas fa-leaf"></i>
                 <h2>Pinaki Farms</h2>
-                <p>Admin Panel</p>
+                <p>Admin Panel Login</p>
             </div>
             
-            <div id="loginError" class="login-error" style="display:none;"></div>
+            <div id="loginError" class="login-error"></div>
             
             <form id="adminLoginForm">
                 <div class="form-group">
                     <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" id="adminEmail" placeholder="admin@pinakifarms.com" required />
+                    <input type="email" id="adminEmail" placeholder="admin@pinakifarms.com" required autocomplete="email" />
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="adminPassword" placeholder="Enter your password" required />
+                    <input type="password" id="adminPassword" placeholder="Enter your password" required autocomplete="current-password" />
                 </div>
                 <button type="submit" class="admin-login-btn">
                     <i class="fas fa-sign-in-alt"></i> Login
@@ -38,33 +123,70 @@
     </div>
 
     <script type="module">
-        import { auth, signInWithEmailAndPassword, onAuthStateChanged } from '../firebase-config.js';
+        // ============ FIXED IMPORTS ============
+        import { 
+            auth, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged,
+            signOut,
+            db,
+            collection,
+            query,
+            where,
+            getDocs
+        } from '../firebase-config.js';
 
-        // Check if already logged in
+        console.log('✅ Admin Login page loaded');
+
+        const form = document.getElementById('adminLoginForm');
+        const emailInput = document.getElementById('adminEmail');
+        const passwordInput = document.getElementById('adminPassword');
+        const errorDiv = document.getElementById('loginError');
+
+        // ============ CHECK IF ALREADY LOGGED IN ============
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                console.log('User already logged in:', user.email);
                 try {
-                    const { db, collection, query, where, getDocs } = await import('../firebase-config.js');
                     const q = query(collection(db, 'admins'), where('email', '==', user.email));
                     const querySnapshot = await getDocs(q);
                     if (!querySnapshot.empty) {
+                        console.log('✅ Admin verified, redirecting...');
                         window.location.href = 'dashboard.html';
+                    } else {
+                        console.log('❌ Not admin, logging out...');
+                        await signOut(auth);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error checking admin:', error);
                 }
             }
         });
 
-        // Handle Login
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+        // ============ SHOW TOAST ============
+        function showToast(message, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ============ HANDLE LOGIN ============
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('adminEmail').value.trim();
-            const password = document.getElementById('adminPassword').value;
-            const errorDiv = document.getElementById('loginError');
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
             
             errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
             
             if (!email || !password) {
                 errorDiv.textContent = '⚠️ Please fill all fields';
@@ -72,39 +194,75 @@
                 return;
             }
             
+            const submitBtn = form.querySelector('.admin-login-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            submitBtn.disabled = true;
+            
             try {
-                // Sign in with Firebase
+                console.log('🔑 Attempting login for:', email);
+                
+                // Sign in with Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                console.log('✅ Login successful:', user.email);
                 
-                // Check if admin
-                const { db, collection, query, where, getDocs } = await import('../firebase-config.js');
+                // Check if user is admin
                 const q = query(collection(db, 'admins'), where('email', '==', user.email));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    errorDiv.textContent = '❌ You are not authorized as admin';
+                    console.log('❌ User is not admin');
+                    errorDiv.textContent = '❌ You are not authorized as admin. Please contact support.';
                     errorDiv.style.display = 'block';
                     await signOut(auth);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                     return;
                 }
                 
-                // Redirect to dashboard
-                window.location.href = 'dashboard.html';
+                // Get admin data
+                let adminData = {};
+                querySnapshot.forEach((doc) => {
+                    adminData = { id: doc.id, ...doc.data() };
+                });
+                console.log('✅ Admin verified:', adminData);
+                
+                showToast('✅ Welcome Admin! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
                 
             } catch (error) {
+                console.error('❌ Login error:', error);
                 let errorMsg = '❌ Login failed. ';
                 switch(error.code) {
                     case 'auth/user-not-found': errorMsg += 'Admin account not found.';
                         break;
-                    case 'auth/wrong-password': errorMsg += 'Wrong password.';
+                    case 'auth/wrong-password': errorMsg += 'Incorrect password.';
+                        break;
+                    case 'auth/invalid-email': errorMsg += 'Invalid email.';
+                        break;
+                    case 'auth/too-many-requests': errorMsg += 'Too many attempts. Try later.';
                         break;
                     default: errorMsg += error.message;
                 }
                 errorDiv.textContent = errorMsg;
                 errorDiv.style.display = 'block';
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         });
+
+        // ============ KEYBOARD SHORTCUTS ============
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                errorDiv.style.display = 'none';
+            }
+        });
+
+        console.log('✅ Admin Login ready!');
     </script>
 </body>
 </html>
