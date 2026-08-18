@@ -1,8 +1,4 @@
-// js/admin-script.js - Refactored for Clarity
-
-// ============================================
-// IMPORTS
-// ============================================
+// js/admin-script.js - COMPLETE FIXED
 import { 
     auth,
     db,
@@ -19,6 +15,8 @@ import {
     onAuthStateChanged
 } from '../firebase-config.js';
 
+console.log('✅ Admin Script loaded');
+
 // ============================================
 // CONSTANTS
 // ============================================
@@ -32,28 +30,16 @@ const COLLECTIONS = {
 };
 
 // ============================================
-// LOGGING
-// ============================================
-const log = {
-    info: (msg) => console.log('ℹ️', msg),
-    success: (msg) => console.log('✅', msg),
-    error: (msg) => console.error('❌', msg),
-    warn: (msg) => console.warn('⚠️', msg),
-    debug: (msg) => console.log('🔍', msg)
-};
-
-log.info('Admin Script loaded');
-
-// ============================================
-// DOM HELPERS
+// HELPERS
 // ============================================
 const $ = (id) => document.getElementById(id);
-const qs = (sel) => document.querySelector(sel);
-const qsa = (sel) => document.querySelectorAll(sel);
+const log = {
+    info: (m) => console.log('ℹ️', m),
+    success: (m) => console.log('✅', m),
+    error: (m) => console.error('❌', m),
+    debug: (m) => console.log('🔍', m)
+};
 
-// ============================================
-// TOAST NOTIFICATION
-// ============================================
 function showToast(message, type = 'success') {
     const existing = document.querySelector('.toast');
     if (existing) existing.remove();
@@ -71,26 +57,22 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================
-// AUTH CHECK
+// AUTH
 // ============================================
-async function checkAdminStatus(user) {
+async function verifyAdmin(user) {
     if (!user) {
-        log.warn('No user, redirecting to login...');
-        window.location.replace('login.html');
+        window.location.href = 'login.html';
         return false;
     }
     
-    log.debug('User email:', user.email);
-    
     if (user.email !== ADMIN_EMAIL) {
-        log.warn('Not admin email, logging out...');
+        log.error('Not admin email');
         await signOut(auth);
-        window.location.replace('login.html');
+        window.location.href = 'login.html';
         return false;
     }
     
     try {
-        log.debug('Checking admins collection...');
         const q = query(collection(db, COLLECTIONS.ADMINS), where('email', '==', user.email));
         const snapshot = await getDocs(q);
         
@@ -102,12 +84,12 @@ async function checkAdminStatus(user) {
                 role: 'admin',
                 createdAt: new Date().toISOString()
             });
-            log.success('Admin document created!');
+            log.success('Admin document created');
         }
         
         return true;
     } catch (error) {
-        log.error('Error checking admin:', error);
+        log.error('Verify admin error:', error);
         return false;
     }
 }
@@ -116,47 +98,37 @@ async function checkAdminStatus(user) {
 // AUTH LISTENER
 // ============================================
 onAuthStateChanged(auth, async (user) => {
-    log.debug('Auth state changed:', user ? 'Logged in' : 'Logged out');
+    log.debug('Auth state:', user ? 'Logged in' : 'Logged out');
     
     if (!user) {
-        window.location.replace('login.html');
+        window.location.href = 'login.html';
         return;
     }
     
-    const isAdmin = await checkAdminStatus(user);
+    const isAdmin = await verifyAdmin(user);
     if (!isAdmin) return;
     
-    // Update admin name
     const nameEl = $('adminName');
     if (nameEl) nameEl.textContent = 'Admin';
     
-    // Load page data
     const path = window.location.pathname;
-    if (path.includes('dashboard.html')) {
-        loadDashboard();
-    } else if (path.includes('products.html')) {
-        loadProducts();
-    } else if (path.includes('orders.html')) {
-        loadOrders();
-    } else if (path.includes('customers.html')) {
-        loadCustomers();
-    } else if (path.includes('reviews.html')) {
-        loadReviews();
-    }
+    if (path.includes('dashboard.html')) loadDashboard();
+    else if (path.includes('products.html')) loadProducts();
+    else if (path.includes('orders.html')) loadOrders();
+    else if (path.includes('customers.html')) loadCustomers();
+    else if (path.includes('reviews.html')) loadReviews();
 });
 
 // ============================================
 // LOGOUT
 // ============================================
 window.logoutAdmin = async function() {
-    if (!confirm('Are you sure you want to logout?')) return;
-    
+    if (!confirm('Logout?')) return;
     try {
         await signOut(auth);
-        window.location.replace('login.html');
-        showToast('Logged out successfully');
+        window.location.href = 'login.html';
+        showToast('Logged out');
     } catch (error) {
-        log.error('Logout failed:', error);
         showToast('Logout failed', 'error');
     }
 };
@@ -166,29 +138,49 @@ window.logoutAdmin = async function() {
 // ============================================
 async function loadDashboard() {
     try {
-        // Products count
-        const productsSnap = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
-        updateElement('totalProducts', productsSnap.size);
+        const products = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
+        const orders = await getDocs(collection(db, COLLECTIONS.ORDERS));
+        const users = await getDocs(collection(db, COLLECTIONS.USERS));
         
-        // Orders count
-        const ordersSnap = await getDocs(collection(db, COLLECTIONS.ORDERS));
-        updateElement('totalOrders', ordersSnap.size);
-        
-        // Revenue
         let revenue = 0;
-        ordersSnap.forEach(doc => {
+        orders.forEach(doc => {
             const data = doc.data();
             revenue += data.total || 0;
         });
-        updateElement('totalRevenue', '₹' + revenue);
         
-        // Customers count
-        const customersSnap = await getDocs(collection(db, COLLECTIONS.USERS));
-        updateElement('totalCustomers', customersSnap.size);
+        updateElement('totalProducts', products.size);
+        updateElement('totalOrders', orders.size);
+        updateElement('totalRevenue', '₹' + revenue);
+        updateElement('totalCustomers', users.size);
         
         // Recent orders
-        renderRecentOrders(ordersSnap);
+        let recent = [];
+        orders.forEach(doc => recent.push({ id: doc.id, ...doc.data() }));
+        recent.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        recent = recent.slice(0, 5);
         
+        const list = $('recentOrdersList');
+        if (list) {
+            if (recent.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No orders</p>';
+            } else {
+                list.innerHTML = `
+                    <table class="admin-table">
+                        <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+                        <tbody>
+                            ${recent.map(o => `
+                                <tr>
+                                    <td>#${o.id.slice(0,8)}</td>
+                                    <td>${o.userName || 'N/A'}</td>
+                                    <td>₹${o.total || 0}</td>
+                                    <td><span class="status-badge status-${o.status || 'pending'}">${o.status || 'Pending'}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+        }
     } catch (error) {
         log.error('Dashboard error:', error);
     }
@@ -199,47 +191,6 @@ function updateElement(id, value) {
     if (el) el.textContent = value;
 }
 
-function renderRecentOrders(ordersSnap) {
-    const list = $('recentOrdersList');
-    if (!list) return;
-    
-    let orders = [];
-    ordersSnap.forEach(doc => {
-        orders.push({ id: doc.id, ...doc.data() });
-    });
-    
-    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    orders = orders.slice(0, 5);
-    
-    if (orders.length === 0) {
-        list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No orders yet</p>';
-        return;
-    }
-    
-    list.innerHTML = `
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${orders.map(o => `
-                    <tr>
-                        <td>#${o.id.slice(0, 8)}</td>
-                        <td>${o.userName || 'N/A'}</td>
-                        <td>₹${o.total || 0}</td>
-                        <td><span class="status-badge status-${o.status || 'pending'}">${o.status || 'Pending'}</span></td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
 // ============================================
 // PRODUCTS
 // ============================================
@@ -247,21 +198,13 @@ async function loadProducts() {
     try {
         const snapshot = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
         const products = [];
-        snapshot.forEach(doc => {
-            products.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
         
         const tbody = $('productList');
         if (!tbody) return;
         
         if (products.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align:center;padding:40px;color:#999;">
-                        No products found. Click "Add New Product" to get started.
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No products</td></tr>';
             return;
         }
         
@@ -274,18 +217,13 @@ async function loadProducts() {
                 <td>${p.originalPrice ? '₹' + p.originalPrice : '-'}</td>
                 <td>${p.inStock ? '✅ In Stock' : '❌ Out of Stock'}</td>
                 <td>
-                    <button class="admin-edit-btn" onclick="editProduct('${p.id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="admin-delete-btn" onclick="deleteProduct('${p.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <button class="admin-edit-btn" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="admin-delete-btn" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
-        
     } catch (error) {
-        log.error('Error loading products:', error);
+        log.error('Load products error:', error);
     }
 }
 
@@ -295,8 +233,7 @@ async function loadProducts() {
 window.openAddProduct = function() {
     const modal = $('productModal');
     if (!modal) return;
-    
-    $('modalTitle').textContent = 'Add New Product';
+    $('modalTitle').textContent = 'Add Product';
     $('productForm').reset();
     $('productId').value = '';
     modal.classList.add('active');
@@ -307,7 +244,7 @@ window.closeProductModal = function() {
     if (modal) modal.classList.remove('active');
 };
 
-// Product Form Submit
+// Product Form
 const productForm = $('productForm');
 if (productForm) {
     productForm.addEventListener('submit', async function(e) {
@@ -329,29 +266,26 @@ if (productForm) {
         try {
             if (id) {
                 await updateDoc(doc(db, COLLECTIONS.PRODUCTS, id), data);
-                showToast('✅ Product updated successfully!');
+                showToast('✅ Product updated');
             } else {
                 await addDoc(collection(db, COLLECTIONS.PRODUCTS), data);
-                showToast('✅ Product added successfully!');
+                showToast('✅ Product added');
             }
             closeProductModal();
             loadProducts();
         } catch (error) {
-            log.error('Error saving product:', error);
             showToast('❌ Error: ' + error.message, 'error');
         }
     });
 }
 
-window.editProduct = async function(productId) {
+window.editProduct = async function(id) {
     try {
-        const docRef = doc(db, COLLECTIONS.PRODUCTS, productId);
-        const docSnap = await getDoc(docRef);
-        
+        const docSnap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id));
         if (docSnap.exists()) {
             const data = docSnap.data();
             $('modalTitle').textContent = 'Edit Product';
-            $('productId').value = productId;
+            $('productId').value = id;
             $('pName').value = data.name || '';
             $('pCategory').value = data.category || '';
             $('pPrice').value = data.price || '';
@@ -364,21 +298,18 @@ window.editProduct = async function(productId) {
             $('productModal').classList.add('active');
         }
     } catch (error) {
-        log.error('Error loading product:', error);
         showToast('❌ Error loading product', 'error');
     }
 };
 
-window.deleteProduct = async function(productId) {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-    
+window.deleteProduct = async function(id) {
+    if (!confirm('Delete this product?')) return;
     try {
-        await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, productId));
-        showToast('✅ Product deleted!');
+        await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, id));
+        showToast('✅ Product deleted');
         loadProducts();
     } catch (error) {
-        log.error('Error deleting product:', error);
-        showToast('❌ Error deleting product', 'error');
+        showToast('❌ Error deleting', 'error');
     }
 };
 
@@ -389,30 +320,22 @@ async function loadOrders() {
     try {
         const snapshot = await getDocs(collection(db, COLLECTIONS.ORDERS));
         const orders = [];
-        snapshot.forEach(doc => {
-            orders.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
         orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         const tbody = $('orderList');
         if (!tbody) return;
         
         if (orders.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align:center;padding:40px;color:#999;">
-                        No orders found
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No orders</td></tr>';
             return;
         }
         
         tbody.innerHTML = orders.map(o => `
             <tr>
-                <td>#${o.id.slice(0, 8)}</td>
+                <td>#${o.id.slice(0,8)}</td>
                 <td>${o.userName || 'N/A'}</td>
-                <td>${o.items?.length || 0} items</td>
+                <td>${o.items?.length || 0}</td>
                 <td><strong>₹${o.total || 0}</strong></td>
                 <td>${o.paymentMethod || 'N/A'}</td>
                 <td>
@@ -425,48 +348,40 @@ async function loadOrders() {
                     </select>
                 </td>
                 <td>
-                    <button class="admin-delete-btn" onclick="deleteOrder('${o.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <button class="admin-delete-btn" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
-        
     } catch (error) {
-        log.error('Error loading orders:', error);
+        log.error('Load orders error:', error);
     }
 }
 
-window.updateOrderStatus = async function(orderId, status) {
+window.updateOrderStatus = async function(id, status) {
     try {
-        await updateDoc(doc(db, COLLECTIONS.ORDERS, orderId), {
+        await updateDoc(doc(db, COLLECTIONS.ORDERS, id), {
             status: status,
             updatedAt: new Date().toISOString()
         });
-        showToast('✅ Order status updated!');
+        showToast('✅ Status updated');
         loadOrders();
     } catch (error) {
-        log.error('Error updating order:', error);
-        showToast('❌ Error updating order', 'error');
+        showToast('❌ Error updating', 'error');
     }
 };
 
-window.deleteOrder = async function(orderId) {
-    if (!confirm('Are you sure you want to delete this order?')) return;
-    
+window.deleteOrder = async function(id) {
+    if (!confirm('Delete this order?')) return;
     try {
-        await deleteDoc(doc(db, COLLECTIONS.ORDERS, orderId));
-        showToast('✅ Order deleted!');
+        await deleteDoc(doc(db, COLLECTIONS.ORDERS, id));
+        showToast('✅ Order deleted');
         loadOrders();
     } catch (error) {
-        log.error('Error deleting order:', error);
-        showToast('❌ Error deleting order', 'error');
+        showToast('❌ Error deleting', 'error');
     }
 };
 
-window.filterOrders = function() {
-    loadOrders();
-};
+window.filterOrders = function() { loadOrders(); };
 
 // ============================================
 // CUSTOMERS
@@ -475,31 +390,20 @@ async function loadCustomers() {
     try {
         const snapshot = await getDocs(collection(db, COLLECTIONS.USERS));
         const customers = [];
-        snapshot.forEach(doc => {
-            customers.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => customers.push({ id: doc.id, ...doc.data() }));
         
-        // Get order counts
         const ordersSnap = await getDocs(collection(db, COLLECTIONS.ORDERS));
-        const orderCounts = {};
+        const counts = {};
         ordersSnap.forEach(doc => {
             const data = doc.data();
-            if (data.userId) {
-                orderCounts[data.userId] = (orderCounts[data.userId] || 0) + 1;
-            }
+            if (data.userId) counts[data.userId] = (counts[data.userId] || 0) + 1;
         });
         
         const tbody = $('customerList');
         if (!tbody) return;
         
         if (customers.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align:center;padding:40px;color:#999;">
-                        No customers found
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No customers</td></tr>';
             return;
         }
         
@@ -508,13 +412,12 @@ async function loadCustomers() {
                 <td><strong>${c.name || 'N/A'}</strong></td>
                 <td>${c.email}</td>
                 <td>${c.phone || 'N/A'}</td>
-                <td>${orderCounts[c.uid] || 0}</td>
+                <td>${counts[c.uid] || 0}</td>
                 <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
             </tr>
         `).join('');
-        
     } catch (error) {
-        log.error('Error loading customers:', error);
+        log.error('Load customers error:', error);
     }
 }
 
@@ -525,22 +428,14 @@ async function loadReviews() {
     try {
         const snapshot = await getDocs(collection(db, COLLECTIONS.REVIEWS));
         const reviews = [];
-        snapshot.forEach(doc => {
-            reviews.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => reviews.push({ id: doc.id, ...doc.data() }));
         reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         const tbody = $('reviewList');
         if (!tbody) return;
         
         if (reviews.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align:center;padding:40px;color:#999;">
-                        No reviews found
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No reviews</td></tr>';
             return;
         }
         
@@ -551,32 +446,24 @@ async function loadReviews() {
                 <td>${r.comment || ''}</td>
                 <td>${r.date || 'N/A'}</td>
                 <td>
-                    <button class="admin-delete-btn" onclick="deleteReview('${r.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <button class="admin-delete-btn" onclick="deleteReview('${r.id}')"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
-        
     } catch (error) {
-        log.error('Error loading reviews:', error);
+        log.error('Load reviews error:', error);
     }
 }
 
-window.deleteReview = async function(reviewId) {
-    if (!confirm('Are you sure you want to delete this review?')) return;
-    
+window.deleteReview = async function(id) {
+    if (!confirm('Delete this review?')) return;
     try {
-        await deleteDoc(doc(db, COLLECTIONS.REVIEWS, reviewId));
-        showToast('✅ Review deleted!');
+        await deleteDoc(doc(db, COLLECTIONS.REVIEWS, id));
+        showToast('✅ Review deleted');
         loadReviews();
     } catch (error) {
-        log.error('Error deleting review:', error);
-        showToast('❌ Error deleting review', 'error');
+        showToast('❌ Error deleting', 'error');
     }
 };
 
-// ============================================
-// INIT LOG
-// ============================================
 log.success('Admin script ready!');
