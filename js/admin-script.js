@@ -1,4 +1,4 @@
-// js/admin-script.js - Updated with Multiple Images
+// js/admin-script.js - With Firebase Storage Upload
 import { 
     auth,
     db,
@@ -15,9 +15,29 @@ import {
     onAuthStateChanged
 } from '../firebase-config.js';
 
+// ============ IMPORT STORAGE ============
+import { 
+    getStorage,
+    ref,
+    uploadBytesResumable,
+    getDownloadURL,
+    deleteObject
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+import { getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+
 console.log('✅ Admin Script loaded!');
 
 const ADMIN_EMAIL = 'admin@pinakifarms.com';
+
+// Initialize Storage
+const app = getApp();
+const storage = getStorage(app);
+
+// ============ STATE ============
+let uploadedImageUrls = [];
+let uploadedVideoUrl = '';
+let isUploading = false;
 
 // ============ AUTH CHECK ============
 onAuthStateChanged(auth, async (user) => {
@@ -179,7 +199,7 @@ async function loadProducts() {
                 <td>
                     ${p.images && p.images.length > 0 
                         ? `<img src="${p.images[0]}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;" />`
-                        : `<span style="font-size:30px;">${p.emoji || '🌿'}</span>`
+                        : `<span style="font-size:30px;">🛒</span>`
                     }
                 </td>
                 <td><strong>${p.name}</strong></td>
@@ -202,50 +222,109 @@ async function loadProducts() {
     }
 }
 
-// ============ ADD IMAGE FIELD ============
-window.addImageField = function() {
-    const container = document.getElementById('imageFields');
-    const row = document.createElement('div');
-    row.className = 'image-input-row';
-    row.style.cssText = 'display:flex;gap:10px;margin-bottom:8px;';
-    row.innerHTML = `
-        <input type="url" class="pImage" placeholder="Image: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
-        <button type="button" onclick="removeImageField(this)" style="background:#e74c3c;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    container.appendChild(row);
-};
-
-window.removeImageField = function(btn) {
-    const row = btn.parentElement;
-    if (document.querySelectorAll('.image-input-row').length > 1) {
-        row.remove();
-    } else {
-        showToast('Need at least one image field');
+// ============ UPLOAD IMAGES ============
+window.uploadImages = function() {
+    const files = document.getElementById('imageUpload').files;
+    if (!files || files.length === 0) {
+        showToast('Please select images');
+        return;
     }
-};
-
-// ============ GET IMAGE URLS ============
-function getImageUrls() {
-    const inputs = document.querySelectorAll('.pImage');
-    const urls = [];
-    inputs.forEach(input => {
-        const url = input.value.trim();
-        if (url) {
-            // Convert Google Drive link to direct image URL if needed
-            let finalUrl = url;
-            if (url.includes('drive.google.com')) {
-                const match = url.match(/[?&]id=([^&]+)/);
-                if (match) {
-                    finalUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    
+    // Clear previous images if adding new product
+    if (!document.getElementById('productId').value) {
+        uploadedImageUrls = [];
+    }
+    
+    const progressDiv = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    progressDiv.style.display = 'block';
+    
+    let uploaded = 0;
+    const total = files.length;
+    
+    Array.from(files).forEach((file, index) => {
+        const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                const totalProgress = ((uploaded + (progress / 100)) / total) * 100;
+                progressBar.style.width = totalProgress + '%';
+                progressText.textContent = Math.round(totalProgress) + '%';
+            },
+            (error) => {
+                console.error('Upload error:', error);
+                showToast('❌ Error uploading: ' + file.name);
+            },
+            async () => {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                uploadedImageUrls.push(downloadURL);
+                uploaded++;
+                
+                // Show preview
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const img = document.createElement('img');
+                img.src = downloadURL;
+                img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #c49b2c;';
+                previewContainer.appendChild(img);
+                
+                if (uploaded === total) {
+                    progressDiv.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    showToast(`✅ ${total} images uploaded successfully!`);
+                    document.getElementById('imageUpload').value = '';
                 }
             }
-            urls.push(finalUrl);
-        }
+        );
     });
-    return urls;
-}
+};
+
+// ============ UPLOAD VIDEO ============
+window.uploadVideo = function() {
+    const file = document.getElementById('videoUpload').files[0];
+    if (!file) {
+        showToast('Please select a video');
+        return;
+    }
+    
+    const progressDiv = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    progressDiv.style.display = 'block';
+    
+    const storageRef = ref(storage, `videos/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        },
+        (error) => {
+            console.error('Upload error:', error);
+            showToast('❌ Error uploading video');
+            progressDiv.style.display = 'none';
+        },
+        async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            uploadedVideoUrl = downloadURL;
+            progressDiv.style.display = 'none';
+            progressBar.style.width = '0%';
+            
+            // Show video preview
+            const previewContainer = document.getElementById('videoPreviewContainer');
+            previewContainer.innerHTML = `
+                <video src="${downloadURL}" controls style="max-width:200px;max-height:150px;border-radius:8px;border:2px solid #c49b2c;"></video>
+                <p style="font-size:12px;color:#2d7d46;margin-top:5px;">✅ Video uploaded successfully!</p>
+            `;
+            showToast('✅ Video uploaded successfully!');
+            document.getElementById('videoUpload').value = '';
+        }
+    );
+};
 
 // ============ OPEN ADD PRODUCT ============
 window.openAddProduct = function() {
@@ -254,18 +333,10 @@ window.openAddProduct = function() {
     document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productForm').reset();
     document.getElementById('productId').value = '';
-    
-    // Reset image fields
-    const container = document.getElementById('imageFields');
-    container.innerHTML = `
-        <div class="image-input-row" style="display:flex;gap:10px;margin-bottom:8px;">
-            <input type="url" class="pImage" placeholder="Image 1: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
-            <button type="button" onclick="addImageField()" style="background:#2d5a27;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
-    `;
-    
+    uploadedImageUrls = [];
+    uploadedVideoUrl = '';
+    document.getElementById('imagePreviewContainer').innerHTML = '';
+    document.getElementById('videoPreviewContainer').innerHTML = '';
     modal.classList.add('active');
 };
 
@@ -282,7 +353,12 @@ if (productForm) {
         e.preventDefault();
         
         const id = document.getElementById('productId').value;
-        const images = getImageUrls();
+        
+        // Check if images are uploaded
+        if (uploadedImageUrls.length === 0) {
+            showToast('⚠️ Please upload at least one image');
+            return;
+        }
         
         const data = {
             name: document.getElementById('pName').value.trim(),
@@ -294,8 +370,8 @@ if (productForm) {
             unit: document.getElementById('pUnit').value.trim() || 'kg',
             inStock: document.getElementById('pInStock').value === 'true',
             badge: document.getElementById('pBadge').value || '',
-            images: images,
-            video: document.getElementById('pVideo').value.trim() || '',
+            images: uploadedImageUrls,
+            video: uploadedVideoUrl || '',
             description: document.getElementById('pDescription').value.trim() || ''
         };
         
@@ -332,34 +408,30 @@ window.editProduct = async function(productId) {
             document.getElementById('pPurity').value = data.purity || '';
             document.getElementById('pInStock').value = data.inStock ? 'true' : 'false';
             document.getElementById('pBadge').value = data.badge || '';
-            document.getElementById('pVideo').value = data.video || '';
             document.getElementById('pDescription').value = data.description || '';
             
-            // Set images
-            const container = document.getElementById('imageFields');
-            container.innerHTML = '';
-            if (data.images && data.images.length > 0) {
-                data.images.forEach((img, index) => {
-                    const row = document.createElement('div');
-                    row.className = 'image-input-row';
-                    row.style.cssText = 'display:flex;gap:10px;margin-bottom:8px;';
-                    row.innerHTML = `
-                        <input type="url" class="pImage" value="${img}" style="flex:1;" />
-                        <button type="button" onclick="removeImageField(this)" style="background:#e74c3c;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    container.appendChild(row);
-                });
-            } else {
-                container.innerHTML = `
-                    <div class="image-input-row" style="display:flex;gap:10px;margin-bottom:8px;">
-                        <input type="url" class="pImage" placeholder="Image 1: https://drive.google.com/uc?export=view&id=..." style="flex:1;" />
-                        <button type="button" onclick="addImageField()" style="background:#2d5a27;color:#fff;border:none;padding:0 15px;border-radius:5px;cursor:pointer;">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
+            // Load existing images
+            uploadedImageUrls = data.images || [];
+            uploadedVideoUrl = data.video || '';
+            
+            // Show image previews
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';
+            uploadedImageUrls.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #c49b2c;';
+                previewContainer.appendChild(img);
+            });
+            
+            // Show video preview
+            const videoContainer = document.getElementById('videoPreviewContainer');
+            if (uploadedVideoUrl) {
+                videoContainer.innerHTML = `
+                    <video src="${uploadedVideoUrl}" controls style="max-width:200px;max-height:150px;border-radius:8px;border:2px solid #c49b2c;"></video>
                 `;
+            } else {
+                videoContainer.innerHTML = '';
             }
             
             document.getElementById('productModal').classList.add('active');
