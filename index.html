@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pinaki Farms - Pure & Organic Farm Products</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Top Info Bar -->
+    <div class="top-info-bar">
+        <div class="container">
+            <span>🌿 100% Organic & Pure</span>
+            <span>📞 +91 98765 43210</span>
+            <span>🚚 Free Delivery on Orders ₹500+</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                <span>Pinaki Farms</span>
+            </div>
+            
+            <nav class="desktop-nav">
+                <a href="#home">Home</a>
+                <a href="#products">Products</a>
+                <a href="#story">Our Story</a>
+                <a href="#reviews">Reviews</a>
+                <a href="#contact">Contact</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="search-toggle" onclick="toggleSearch()">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="cart-toggle" onclick="toggleCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="auth-toggle" onclick="toggleAuth()">
+                    <i class="fas fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="searchBar">
+        <div class="container">
+            <input type="text" id="searchInput" placeholder="Search for products..." onkeyup="searchProducts()" />
+            <button onclick="searchProducts()"><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Pure & Organic Farm Fresh Products</h1>
+                <p>Directly from our farms to your doorstep. 100% natural, chemical-free, and sustainably grown.</p>
+                <button class="cta-button" onclick="scrollToProducts()">Shop Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2>Our Products</h2>
+            <div class="category-filters">
+                <button class="filter-btn active" onclick="filterProducts('all')">All</button>
+                <button class="filter-btn" onclick="filterProducts('vegetables')">Vegetables</button>
+                <button class="filter-btn" onclick="filterProducts('fruits')">Fruits</button>
+                <button class="filter-btn" onclick="filterProducts('grains')">Grains</button>
+                <button class="filter-btn" onclick="filterProducts('dairy')">Dairy</button>
+            </div>
+            <div class="product-grid" id="productGrid"></div>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="story" id="story">
+        <div class="container">
+            <h2>Our Story</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <h3>From Farm to Table</h3>
+                    <p>Pinaki Farms was born from a simple idea - to provide pure, organic, and healthy farm products to every household. We believe in sustainable farming practices that respect nature and produce the finest quality food.</p>
+                    <ul>
+                        <li>🌱 100% Organic Farming</li>
+                        <li>💧 Pure Water Irrigation</li>
+                        <li>🌿 No Chemicals or Pesticides</li>
+                        <li>🚜 Family-Owned Since 1985</li>
+                    </ul>
+                </div>
+                <div class="story-image">
+                    <i class="fas fa-tractor"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews" id="reviews">
+        <div class="container">
+            <h2>Customer Reviews</h2>
+            <div class="review-grid" id="reviewGrid">
+                <!-- Reviews will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Get in Touch</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Pinaki Farms, Village Road, District, State - 123456</p>
+                    <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+                    <p><i class="fas fa-envelope"></i> info@pinakifarms.com</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <form class="contact-form" onsubmit="submitContact(event)">
+                    <input type="text" placeholder="Your Name" required />
+                    <input type="email" placeholder="Your Email" required />
+                    <textarea placeholder="Your Message" rows="5" required></textarea>
+                    <button type="submit">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Drawer -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+            <button onclick="toggleCart()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-content">
+            <button class="auth-close" onclick="toggleAuth()"><i class="fas fa-times"></i></button>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+            <form id="loginForm" onsubmit="login(event)">
+                <input type="email" id="loginEmail" placeholder="Email" required />
+                <input type="password" id="loginPassword" placeholder="Password" required />
+                <button type="submit">Login</button>
+            </form>
+            <form id="signupForm" onsubmit="signup(event)" style="display: none;">
+                <input type="text" id="signupName" placeholder="Full Name" required />
+                <input type="email" id="signupEmail" placeholder="Email" required />
+                <input type="password" id="signupPassword" placeholder="Password" required />
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Pinaki Farms</h4>
+                    <p>Pure & Organic Farm Products</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="#home">Home</a>
+                    <a href="#products">Products</a>
+                    <a href="#story">Our Story</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Pinaki Farms. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+        <button onclick="scrollToSection('home')"><i class="fas fa-home"></i><span>Home</span></button>
+        <button onclick="scrollToSection('products')"><i class="fas fa-store"></i><span>Shop</span></button>
+        <button onclick="toggleCart()"><i class="fas fa-shopping-cart"></i><span>Cart</span></button>
+        <button onclick="toggleAuth()"><i class="fas fa-user"></i><span>Account</span></button>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
