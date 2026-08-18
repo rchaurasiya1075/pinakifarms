@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - Pinaki Farms</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>Pinaki Farms</span>
+                </a>
+                <span class="dashboard-title">| Order History</span>
+            </div>
+            <div class="header-right">
+                <span class="user-welcome" id="userWelcome">Welcome, User!</span>
+                <button onclick="logoutUser()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Sidebar -->
+                <aside class="dashboard-sidebar">
+                    <div class="user-profile-card">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3 id="userName">User Name</h3>
+                        <p id="userEmail">user@email.com</p>
+                        <span class="user-role">Customer</span>
+                    </div>
+                    
+                    <nav class="dashboard-nav">
+                        <a href="dashboard.html">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <a href="order-history.html" class="active">
+                            <i class="fas fa-shopping-bag"></i> Order History
+                        </a>
+                        <a href="payment-history.html">
+                            <i class="fas fa-credit-card"></i> Payment History
+                        </a>
+                        <a href="profile.html">
+                            <i class="fas fa-user-cog"></i> Profile Settings
+                        </a>
+                        <a href="index.html">
+                            <i class="fas fa-store"></i> Continue Shopping
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="dashboard-main">
+                    <div class="page-header">
+                        <h2><i class="fas fa-shopping-bag"></i> Order History</h2>
+                        <div class="filter-options">
+                            <select id="orderFilter" onchange="filterOrders()">
+                                <option value="all">All Orders</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="orders-table-wrapper">
+                        <table class="orders-table full-width">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Payment Method</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allOrdersBody">
+                                <tr>
+                                    <td colspan="8" style="text-align:center;padding:60px;">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div class="modal" id="orderDetailModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeOrderDetail()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3>Order Details</h3>
+            <div id="orderDetailContent"></div>
+        </div>
+    </div>
+
+    <script type="module" src="dashboard-script.js"></script>
+</body>
+</html>
