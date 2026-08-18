@@ -1,9 +1,11 @@
-// script.js
+// script.js - COMPLETE FIXED
 import { 
     db, auth,
     collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot,
     createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from './firebase-config.js';
+
+console.log('✅ Script loaded successfully!');
 
 // ============= STATE =============
 let state = {
@@ -27,8 +29,9 @@ const searchBar = document.getElementById('searchBar');
 const searchInput = document.getElementById('searchInput');
 
 // ============= INIT =============
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadProducts();
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM fully loaded');
+    loadProducts();
     loadCartFromLocal();
     updateCartUI();
     setupAuthListener();
@@ -37,128 +40,172 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ============= AUTH FUNCTIONS =============
 
+// Toggle Auth Modal
 window.toggleAuth = function() {
-    authModal.classList.toggle('active');
-    document.body.style.overflow = authModal.classList.contains('active') ? 'hidden' : 'auto';
+    console.log('🔑 Toggle auth called');
+    if (authModal) {
+        authModal.classList.toggle('active');
+        document.body.style.overflow = authModal.classList.contains('active') ? 'hidden' : 'auto';
+    }
 }
 
-window.closeAuth = function() {
-    authModal.classList.remove('active');
-    document.body.style.overflow = 'auto';
+// Close Auth Modal
+window.closeAuthModal = function() {
+    console.log('❌ Close auth called');
+    if (authModal) {
+        authModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 }
 
-window.switchToSignup = function() {
-    document.getElementById('loginForm').classList.remove('active');
-    document.getElementById('signupForm').classList.add('active');
+// Show Signup Form
+window.showSignupForm = function() {
+    console.log('📝 Show signup form');
+    document.getElementById('loginFormContainer').classList.remove('active');
+    document.getElementById('signupFormContainer').classList.add('active');
 }
 
-window.switchToLogin = function() {
-    document.getElementById('signupForm').classList.remove('active');
-    document.getElementById('loginForm').classList.add('active');
+// Show Login Form
+window.showLoginForm = function() {
+    console.log('🔐 Show login form');
+    document.getElementById('signupFormContainer').classList.remove('active');
+    document.getElementById('loginFormContainer').classList.add('active');
 }
 
+// ============= HANDLE LOGIN =============
 window.handleLogin = async function(event) {
     event.preventDefault();
+    console.log('🔑 Login form submitted');
+    
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     
     if (!email || !password) {
-        showToast('Please fill all fields');
-        return;
+        showToast('⚠️ Please fill all fields');
+        return false;
     }
     
     try {
-        showToast('Logging in...');
+        showToast('⏳ Logging in...');
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        console.log('✅ Login successful:', user.email);
         
+        // Get user data
         const q = query(collection(db, 'users'), where('uid', '==', user.uid));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             state.currentUserData = { id: doc.id, ...doc.data() };
         });
         
-        showToast('Welcome back, ' + (state.currentUserData?.name || 'User') + '! 🎉');
-        closeAuth();
+        showToast('🎉 Welcome back, ' + (state.currentUserData?.name || 'User') + '!');
+        closeAuthModal();
         document.getElementById('loginForm').reset();
         updateUserUI();
+        return false;
         
     } catch (error) {
-        let errorMsg = 'Login failed. ';
+        console.error('❌ Login error:', error);
+        let errorMsg = '❌ Login failed. ';
         switch(error.code) {
             case 'auth/user-not-found': errorMsg += 'No account found.';
                 break;
             case 'auth/wrong-password': errorMsg += 'Wrong password.';
                 break;
+            case 'auth/invalid-email': errorMsg += 'Invalid email.';
+                break;
             default: errorMsg += error.message;
         }
         showToast(errorMsg);
+        return false;
     }
 }
 
+// ============= HANDLE SIGNUP =============
 window.handleSignup = async function(event) {
     event.preventDefault();
+    console.log('📝 Signup form submitted');
+    
     const name = document.getElementById('signupName').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     const phone = document.getElementById('signupPhone').value.trim();
     
     if (!name || !email || !password) {
-        showToast('Please fill all required fields');
-        return;
+        showToast('⚠️ Please fill all required fields');
+        return false;
     }
+    
     if (password.length < 6) {
-        showToast('Password must be at least 6 characters');
-        return;
+        showToast('⚠️ Password must be at least 6 characters');
+        return false;
     }
     
     try {
-        showToast('Creating account...');
+        showToast('⏳ Creating account...');
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        console.log('✅ Signup successful:', user.email);
         
-        await addDoc(collection(db, 'users'), {
+        // Save user data
+        const userData = {
             uid: user.uid,
             name: name,
             email: email,
             phone: phone || '',
             role: 'customer',
             createdAt: new Date().toISOString()
-        });
+        };
         
-        showToast('Account created! Welcome ' + name + '! 🎉');
-        closeAuth();
+        await addDoc(collection(db, 'users'), userData);
+        state.currentUserData = userData;
+        
+        showToast('🎉 Account created! Welcome ' + name + '!');
+        closeAuthModal();
         document.getElementById('signupForm').reset();
         updateUserUI();
+        return false;
         
     } catch (error) {
-        let errorMsg = 'Signup failed. ';
+        console.error('❌ Signup error:', error);
+        let errorMsg = '❌ Signup failed. ';
         switch(error.code) {
             case 'auth/email-already-in-use': errorMsg += 'Email already registered.';
+                break;
+            case 'auth/invalid-email': errorMsg += 'Invalid email.';
+                break;
+            case 'auth/weak-password': errorMsg += 'Password too weak.';
                 break;
             default: errorMsg += error.message;
         }
         showToast(errorMsg);
+        return false;
     }
 }
 
+// ============= LOGOUT =============
 window.logout = async function() {
+    console.log('🚪 Logout called');
     try {
         await signOut(auth);
         state.currentUser = null;
         state.currentUserData = null;
         state.currentUserRole = 'customer';
-        showToast('Logged out successfully');
+        showToast('👋 Logged out successfully');
         updateUserUI();
         renderProducts();
     } catch (error) {
-        showToast('Logout failed: ' + error.message);
+        showToast('❌ Logout failed: ' + error.message);
     }
 }
 
+// ============= AUTH LISTENER =============
 function setupAuthListener() {
+    console.log('👂 Setting up auth listener');
     onAuthStateChanged(auth, async (user) => {
+        console.log('🔄 Auth state changed:', user ? 'Logged in' : 'Logged out');
         state.currentUser = user;
+        
         if (user) {
             try {
                 const q = query(collection(db, 'users'), where('uid', '==', user.uid));
@@ -168,17 +215,19 @@ function setupAuthListener() {
                     state.currentUserRole = state.currentUserData.role || 'customer';
                 });
             } catch (error) {
-                console.error('Error fetching user data:', error);
+                console.error('❌ Error fetching user data:', error);
             }
         } else {
             state.currentUserData = null;
             state.currentUserRole = 'customer';
         }
+        
         updateUserUI();
         renderProducts();
     });
 }
 
+// ============= UPDATE USER UI =============
 function updateUserUI() {
     const authBtn = document.querySelector('.auth-toggle');
     
@@ -197,7 +246,9 @@ function updateUserUI() {
         
         authBtn.onclick = function(e) {
             e.preventDefault();
-            if (confirm('Logout?')) logout();
+            if (confirm('Are you sure you want to logout?')) {
+                logout();
+            }
         };
     } else {
         authBtn.innerHTML = `<i class="fas fa-user"></i>`;
@@ -210,8 +261,8 @@ function updateUserUI() {
 }
 
 // ============= PRODUCT FUNCTIONS =============
-
 async function loadProducts() {
+    console.log('📦 Loading products...');
     try {
         const q = collection(db, 'products');
         onSnapshot(q, (snapshot) => {
@@ -222,7 +273,7 @@ async function loadProducts() {
             renderProducts();
         });
     } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('❌ Error loading products:', error);
         loadSampleProducts();
     }
 }
@@ -240,6 +291,8 @@ function loadSampleProducts() {
 }
 
 function renderProducts() {
+    if (!productGrid) return;
+    
     let filtered = state.products;
     if (state.currentFilter !== 'all') {
         filtered = state.products.filter(p => p.category === state.currentFilter);
@@ -282,6 +335,8 @@ function renderProducts() {
         </div>
     `).join('');
 }
+
+// ============= OTHER FUNCTIONS =============
 
 window.filterProducts = function(category) {
     state.currentFilter = category;
@@ -508,3 +563,5 @@ window.editProduct = function(productId) {
     if (!product) return;
     showToast('Edit: ' + product.name + ' (Admin feature)');
 }
+
+console.log('✅ All functions loaded successfully!');
