@@ -93,6 +93,11 @@
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const message = document.getElementById('message');
+    const allowedDestinations = new Set(['dashboard.html', 'checkout.html', 'order-history.html', 'payment-history.html', 'profile.html']);
+    function postLoginDestination() {
+      const next = new URLSearchParams(window.location.search).get('next');
+      return allowedDestinations.has(next) ? next : 'dashboard.html';
+    }
 
     function showMessage(text, type = 'error') {
       message.textContent = text;
@@ -135,8 +140,8 @@
       event.preventDefault();
       try {
         await signInWithEmailAndPassword(auth, loginEmail.value.trim(), loginPassword.value);
-        showMessage('Login successful. Opening the shop...', 'success');
-        window.setTimeout(() => window.location.replace('index.html'), 600);
+        showMessage('Login successful. Opening your account...', 'success');
+        window.setTimeout(() => window.location.replace(postLoginDestination()), 600);
       } catch (error) {
         showMessage(error.code === 'auth/wrong-password' ? 'Incorrect password.' : 'Login failed. Please check your details.');
       }
@@ -155,8 +160,8 @@
           role: 'customer',
           createdAt: new Date().toISOString()
         });
-        showMessage('Account created. Opening the shop...', 'success');
-        window.setTimeout(() => window.location.replace('index.html'), 600);
+        showMessage('Account created. Opening your account...', 'success');
+        window.setTimeout(() => window.location.replace(postLoginDestination()), 600);
       } catch (error) {
         showMessage(error.code === 'auth/email-already-in-use' ? 'This email is already registered.' : 'Unable to create account. Please try again.');
       }
