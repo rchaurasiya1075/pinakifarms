@@ -6,6 +6,7 @@ import {
     signInWithEmailAndPassword, 
     onAuthStateChanged, 
     signOut,
+    sendPasswordResetEmail,
     updatePassword,
     reauthenticateWithCredential,
     EmailAuthProvider
@@ -318,6 +319,18 @@ window.loadProfile = function() {
     document.getElementById('profilePhone').value = userData.phone || '';
     document.getElementById('profileAddress').value = userData.address || '';
     document.getElementById('profilePincode').value = userData.pincode || '';
+}
+
+// ============= SEND PASSWORD RESET LINK =============
+window.sendProfileResetLink = async function() {
+    if (!currentUser?.email) { showToast('Please sign in again and try.'); return; }
+    try {
+        await sendPasswordResetEmail(auth, currentUser.email);
+        showToast('Password-reset link sent to your registered email.');
+    } catch (error) {
+        console.error('Password reset error:', error);
+        showToast('Unable to send reset link. Please try again.');
+    }
 }
 
 // ============= CHANGE PASSWORD =============
