@@ -26,7 +26,7 @@ onAuthStateChanged(auth, async (user) => {
     
     if (!user) {
         // Redirect to login if not authenticated
-        window.location.href = 'index.html';
+        window.location.href = 'customer-login.html?next=' + encodeURIComponent(window.location.pathname.split('/').pop() || 'dashboard.html');
         return;
     }
     
@@ -45,9 +45,13 @@ async function loadUserData() {
         });
         
         // Update UI with user data
-        document.getElementById('userName').textContent = userData?.name || 'User';
-        document.getElementById('userEmail').textContent = userData?.email || '';
-        document.getElementById('userWelcome').textContent = 'Welcome, ' + (userData?.name || 'User') + '!';
+        const userNameEl = document.getElementById('userName');
+        const userEmailEl = document.getElementById('userEmail');
+        const userWelcomeEl = document.getElementById('userWelcome');
+        if (userNameEl) userNameEl.textContent = userData?.name || 'User';
+        if (userEmailEl) userEmailEl.textContent = userData?.email || '';
+        if (userWelcomeEl) userWelcomeEl.textContent = 'Welcome, ' + (userData?.name || 'User') + '!';
+        if (document.getElementById('profileForm')) window.loadProfile();
         
         console.log('✅ User data loaded:', userData);
     } catch (error) {
@@ -316,8 +320,7 @@ window.updateProfile = async function(event) {
 
 // ============= LOAD PROFILE =============
 window.loadProfile = function() {
-    if (!userData) return;
-    
+    if (!userData || !document.getElementById('profileForm')) return;
     document.getElementById('profileName').value = userData.name || '';
     document.getElementById('profileEmail').value = userData.email || '';
     document.getElementById('profilePhone').value = userData.phone || '';
