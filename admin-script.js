@@ -1,6 +1,6 @@
 import{auth,db,collection,addDoc,getDocs,doc,updateDoc,deleteDoc,query,where,getDoc,onAuthStateChanged,signOut}from'./firebase-config.js';
 let adminUser=null;const $=id=>document.getElementById(id);const esc=v=>{const e=document.createElement('i');e.textContent=v||'';return e.innerHTML};const toast=t=>{const e=document.createElement('div');e.textContent=t;e.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:9px;background:#8c2d19;color:#fff;z-index:99999;font-weight:bold';document.body.append(e);setTimeout(()=>e.remove(),2800)};
-async function isAdmin(user){const s=await getDocs(query(collection(db,'admins'),where('email','==',user.email)));return !s.empty}
+async function isAdmin(user){const s=await getDoc(doc(db,'admins',user.uid));return s.exists()}
 onAuthStateChanged(auth,async user=>{if(!user){location.replace('admin-login.html');return}if(!await isAdmin(user)){await signOut(auth);location.replace('admin-login.html');return}adminUser=user;$('adminName').textContent=user.email;loadAll()});
 window.adminLogout=async()=>{await signOut(auth);location.replace('admin-login.html')};
 window.showAdminSection=name=>{document.querySelectorAll('.admin-section').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.admin-nav a').forEach(x=>x.classList.remove('active'));$('admin'+name[0].toUpperCase()+name.slice(1)).classList.add('active');const a=[...document.querySelectorAll('.admin-nav a')].find(x=>x.getAttribute('onclick')?.includes("'"+name+"'"));if(a)a.classList.add('active')};
