@@ -25,24 +25,24 @@
                 <span>Pinaki Farms</span>
             </div>
             
-            <nav class="desktop-nav">
+            <nav class="desktop-nav" aria-label="Main navigation">
                 <a href="#home">Home</a>
-                <a href="#products">Products</a>
+                <a href="#products">Shop</a>
                 <a href="#story">Our Story</a>
                 <a href="#reviews">Reviews</a>
                 <a href="#contact">Contact</a>
             </nav>
 
             <div class="header-actions">
-                <button class="search-toggle" onclick="toggleSearch()">
-                    <i class="fas fa-search"></i>
+                <button class="search-toggle" onclick="toggleSearch()" title="Search">
+                    <i class="fas fa-search"></i><span class="desktop-action-label">Search</span>
                 </button>
-                <button class="cart-toggle" onclick="toggleCart()">
-                    <i class="fas fa-shopping-cart"></i>
+                <button class="cart-toggle" onclick="toggleCart()" title="Cart">
+                    <i class="fas fa-shopping-cart"></i><span class="desktop-action-label">Cart</span>
                     <span class="cart-count" id="cartCount">0</span>
                 </button>
-                <button class="auth-toggle" onclick="window.location.href='customer-login.html'" title="Customer Login">
-                    <i class="fas fa-user"></i>
+                <button class="auth-toggle" onclick="window.location.href='customer-login.html'" title="My Account">
+                    <i class="fas fa-user"></i><span class="desktop-action-label">Account</span>
                 </button>
             </div>
         </div>
@@ -146,10 +146,17 @@
         </div>
         <div class="cart-items" id="cartItems"></div>
         <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span id="cartTotal">₹0</span>
+            <div class="coupon-box">
+                <label for="couponCode">Have a coupon?</label>
+                <div class="coupon-row">
+                    <input id="couponCode" type="text" placeholder="Enter coupon code" autocomplete="off" />
+                    <button type="button" onclick="applyCoupon()">Apply</button>
+                </div>
+                <small id="couponMessage"></small>
             </div>
+            <div class="cart-total"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div>
+            <div class="cart-total discount-total" id="discountRow" hidden><span>Discount:</span><span id="cartDiscount">−₹0</span></div>
+            <div class="cart-total"><strong>Total:</strong><strong id="cartTotal">₹0</strong></div>
             <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
         </div>
     </div>
