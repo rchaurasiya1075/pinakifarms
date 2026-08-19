@@ -77,6 +77,8 @@ onAuthStateChanged(auth, async (user) => {
             loadOrders();
         } else if (path.includes('customers.html')) {
             loadCustomers();
+        } else if (path.includes('coupons.html')) {
+            loadCoupons();
         } else if (path.includes('reviews.html')) {
             loadReviews();
         }
@@ -550,16 +552,18 @@ async function loadCustomers() {
         if (!tbody) return;
         
         if (customers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#999;">No customers found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No customers found</td></tr>';
             return;
         }
         
         tbody.innerHTML = customers.map(c => `
             <tr>
                 <td><strong>${c.name || 'N/A'}</strong></td>
-                <td>${c.email}</td>
+                <td>${c.email || 'N/A'}</td>
                 <td>${c.phone || 'N/A'}</td>
+                <td>${[c.address, c.pincode].filter(Boolean).join(', ') || 'Not added'}</td>
                 <td>${orderCounts[c.uid] || 0}</td>
+                <td>${c.updatedAt ? new Date(c.updatedAt).toLocaleDateString('en-IN') : '—'}</td>
                 <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
             </tr>
         `).join('');
@@ -623,5 +627,89 @@ window.deleteReview = async function(reviewId) {
 window.filterOrders = function() {
     loadOrders();
 };
+
+// ============ COUPONS ============
+async function loadCoupons() {
+    try {
+        const snapshot = await getDocs(collection(db, 'coupons'));
+        const coupons = snapshot.docs.map(item => ({ id: item.id, ...item.data() }))
+            .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        const tbody = document.getElementById('couponList');
+        if (!tbody) return;
+        if (!coupons.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">No coupons created yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = coupons.map(coupon => {
+            const expired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
+            const available = coupon.active && !expired;
+            return `<tr>
+                <td><strong>${coupon.code}</strong></td>
+                <td>${coupon.percent}% off</td>
+                <td>${coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString('en-IN') : 'No expiry'}</td>
+                <td><span class="status-badge ${available ? 'status-shipped' : 'status-cancelled'}">${available ? 'Active' : (expired ? 'Expired' : 'Inactive')}</span></td>
+                <td>${coupon.createdAt ? new Date(coupon.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+                <td><button class="admin-edit-btn" onclick="toggleCoupon('${coupon.id}', ${!coupon.active})">${coupon.active ? 'Disable' : 'Enable'}</button><button class="admin-delete-btn" onclick="deleteCoupon('${coupon.id}')"><i class="fas fa-trash"></i></button></td>
+            </tr>`;
+        }).join('');
+    } catch (error) {
+        console.error('Coupon loading error:', error);
+        showToast('Unable to load coupons');
+    }
+}
+
+window.openCouponModal = function() {
+    document.getElementById('couponForm').reset();
+    document.getElementById('couponActive').checked = true;
+    document.getElementById('couponModal').classList.add('active');
+};
+window.closeCouponModal = function() {
+    document.getElementById('couponModal').classList.remove('active');
+};
+window.toggleCoupon = async function(id, active) {
+    try {
+        await updateDoc(doc(db, 'coupons', id), { active, updatedAt: new Date().toISOString() });
+        showToast(active ? 'Coupon enabled' : 'Coupon disabled');
+        loadCoupons();
+    } catch (error) { showToast('Unable to update coupon'); }
+};
+window.deleteCoupon = async function(id) {
+    if (!confirm('Delete this coupon permanently?')) return;
+    try {
+        await deleteDoc(doc(db, 'coupons', id));
+        showToast('Coupon deleted');
+        loadCoupons();
+    } catch (error) { showToast('Unable to delete coupon'); }
+};
+
+const couponForm = document.getElementById('couponForm');
+if (couponForm) {
+    couponForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const code = document.getElementById('couponCodeAdmin').value.trim().toUpperCase();
+        const percent = Number(document.getElementById('couponPercent').value);
+        const expiresAt = document.getElementById('couponExpiry').value;
+        const active = document.getElementById('couponActive').checked;
+        if (!/^[A-Z0-9_-]{3,24}$/.test(code) || percent < 1 || percent > 100) {
+            showToast('Use a valid code and a discount from 1% to 100%.');
+            return;
+        }
+        try {
+            const existing = await getDocs(query(collection(db, 'coupons'), where('code', '==', code)));
+            if (!existing.empty) { showToast('That coupon code already exists.'); return; }
+            await addDoc(collection(db, 'coupons'), {
+                code, percent, expiresAt: expiresAt || '', active,
+                createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+            });
+            closeCouponModal();
+            showToast('Coupon created successfully');
+            loadCoupons();
+        } catch (error) {
+            console.error('Coupon create error:', error);
+            showToast('Unable to create coupon');
+        }
+    });
+}
+
 
 console.log('✅ Admin script ready!');
