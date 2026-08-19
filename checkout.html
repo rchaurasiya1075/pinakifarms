@@ -1,40 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Checkout - Pinaki Farms</title>
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-.checkout{max-width:1100px;margin:34px auto;padding:0 20px;display:grid;grid-template-columns:1.2fr .8fr;gap:24px}.panel{background:#fff;border-radius:14px;padding:26px;box-shadow:0 4px 18px rgba(0,0,0,.08)}.panel h2{color:#1a4d2e;margin:0 0 18px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin-bottom:14px}.field label{display:block;font-weight:600;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;padding:11px;border:1px solid #d9dfd3;border-radius:8px;font:inherit}.payment{border:1px solid #dfe7da;border-radius:10px;padding:14px;margin:10px 0}.payment.disabled{opacity:.6}.summary-line{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #edf0eb}.total{font-size:20px;font-weight:800;color:#1a4d2e}.place{width:100%;padding:14px;border:0;border-radius:9px;background:#1a4d2e;color:#fff;font-weight:800;font-size:16px;cursor:pointer;margin-top:18px}.notice{padding:12px;background:#f4f7f2;border-left:4px solid #c49b2c;font-size:14px}.item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #edf0eb}@media(max-width:800px){.checkout{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
-</style></head>
-<body>
-<header><div class="container header-content"><a class="logo" href="index.html" style="text-decoration:none"><i class="fas fa-leaf"></i><span>Pinaki Farms</span></a><a href="index.html" style="color:#1a4d2e;font-weight:700">← Continue Shopping</a></div></header>
-<main class="checkout"><section class="panel"><h2><i class="fas fa-map-marker-alt"></i> Delivery Details</h2><form id="checkoutForm">
-<div class="row"><div class="field"><label>Full Name</label><input id="name" required></div><div class="field"><label>Mobile Number</label><input id="phone" inputmode="tel" required></div></div>
-<div class="field"><label>Email</label><input id="email" type="email" required readonly></div>
-<div class="field"><label>Full Delivery Address</label><textarea id="address" rows="3" required placeholder="House no., street, locality"></textarea></div>
-<div class="row"><div class="field"><label>City</label><input id="city" required></div><div class="field"><label>Pincode</label><input id="pincode" inputmode="numeric" pattern="[0-9]{6}" required></div></div>
-<div class="field"><label>Order Note (optional)</label><textarea id="note" rows="2" placeholder="Any delivery instructions"></textarea></div>
-<h2 style="margin-top:26px"><i class="fas fa-credit-card"></i> Payment Method</h2>
-<label class="payment"><input type="radio" name="payment" value="cod" checked> <strong>Cash on Delivery</strong><br><small>Pay when your order is delivered.</small></label>
-<label class="payment disabled"><input type="radio" name="payment" value="upi" disabled> <strong>UPI / QR Payment</strong><br><small>UPI QR will be enabled after the store UPI ID is configured.</small></label>
-<div class="notice"><strong>Order flow:</strong> after placing your order you will get an order ID. You can track delivery, request cancellation before dispatch, and request a return after delivery.</div>
-<button class="place" type="submit"><i class="fas fa-lock"></i> Place Secure Order</button></form></section>
-<aside class="panel"><h2><i class="fas fa-receipt"></i> Order Summary</h2><div id="items"></div><div class="summary-line"><span>Subtotal</span><strong id="subtotal">₹0</strong></div><div class="summary-line" id="discountRow" hidden><span>Coupon discount</span><strong id="discount">−₹0</strong></div><div class="summary-line total"><span>Total</span><span id="total">₹0</span></div><p id="couponInfo" style="color:#19723a;font-size:14px"></p></aside>
-</main>
-<script type="module">
-import { auth, db } from './firebase-config.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-import { collection, addDoc, doc, getDoc, getDocs, query, runTransaction, updateDoc, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-let user, userProfile, cart = [], coupon = null;
-const money = value => '₹' + Math.round(value || 0);
-function getTotals(){const subtotal=cart.reduce((sum,item)=>sum+Number(item.price)*Number(item.quantity),0);const discount=coupon?Math.round(subtotal*Number(coupon.percent)/100):0;return {subtotal,discount,total:subtotal-discount};}
-function render(){const t=getTotals();items.innerHTML=cart.map(i=>'<div class="item"><span>'+i.name+' × '+i.quantity+'</span><strong>'+money(i.price*i.quantity)+'</strong></div>').join('');subtotal.textContent=money(t.subtotal);discountRow.hidden=!t.discount;discount.textContent='−'+money(t.discount);total.textContent=money(t.total);couponInfo.textContent=coupon?'Coupon '+coupon.code+' applied ('+coupon.percent+'% off)':'';}
-onAuthStateChanged(auth, async current=>{if(!current){location.replace('customer-login.html');return;}user=current;cart=JSON.parse(localStorage.getItem('pinaki_cart')||'[]');coupon=JSON.parse(localStorage.getItem('pinaki_checkout_coupon')||'null');if(!cart.length){location.replace('index.html');return;}const users=await getDocs(query(collection(db,'users'),where('uid','==',user.uid)));userProfile=users.docs[0]?.data()||{};name.value=userProfile.name||'';phone.value=userProfile.phone||'';email.value=user.email;address.value=userProfile.address||'';pincode.value=userProfile.pincode||'';render();});
-checkoutForm.addEventListener('submit',async event=>{event.preventDefault();const button=checkoutForm.querySelector('button');button.disabled=true;button.textContent='Placing order...';try{let validCoupon=null;if(coupon){await runTransaction(db,async transaction=>{const ref=doc(db,'coupons',coupon.id);const snap=await transaction.get(ref);if(!snap.exists())throw Error('Coupon unavailable');const data=snap.data();const expired=data.expiresAt&&new Date(data.expiresAt)<new Date();if(!data.active||data.used||expired)throw Error('Coupon unavailable');validCoupon={id:snap.id,...data};transaction.update(ref,{used:true,active:false,usedAt:new Date().toISOString(),usedBy:user.uid,updatedAt:new Date().toISOString()});});coupon={id:validCoupon.id,code:validCoupon.code,percent:validCoupon.percent};}
-const totals=getTotals(),now=new Date().toISOString(),orderNumber='PF-'+Date.now().toString().slice(-8);
-const order=await addDoc(collection(db,'orders'),{orderNumber,userId:user.uid,userName:name.value.trim(),userEmail:user.email,userPhone:phone.value.trim(),deliveryAddress:{address:address.value.trim(),city:city.value.trim(),pincode:pincode.value.trim()},note:note.value.trim(),items:cart,subtotal:totals.subtotal,discount:totals.discount,total:totals.total,couponCode:coupon?.code||'',paymentMethod:document.querySelector('input[name="payment"]:checked').value,paymentStatus:'pending',status:'pending',createdAt:now,updatedAt:now,tracking:[{status:'Order placed',at:now,message:'Your order has been received.'}]});
-await updateDoc(doc(db,'users',users.docs[0].id),{name:name.value.trim(),phone:phone.value.trim(),address:address.value.trim()+', '+city.value.trim(),pincode:pincode.value.trim(),updatedAt:now});
-localStorage.removeItem('pinaki_cart');localStorage.removeItem('pinaki_checkout_coupon');location.replace('track-order.html?order='+order.id);
-}catch(error){console.error(error);alert(error.message==='Coupon unavailable'?'Coupon has already been used or expired. Remove it and try again.':'Unable to place order. Please try again.');button.disabled=false;button.innerHTML='<i class="fas fa-lock"></i> Place Secure Order';}});
-</script></body></html>
+<!-- CHECKOUT FORM HTML -->
+<form id="checkoutForm">
+    <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="custName" required placeholder="Apna pura naam likhein">
+    </div>
+
+    <div class="input-group">
+        <label>Phone Number</label>
+        <input type="tel" id="custPhone" required placeholder="Mobile Number">
+    </div>
+
+    <div class="input-group">
+        <label>Delivery Address</label>
+        <input type="text" id="custAddress" required placeholder="Ghar ka pata, House No., Gali">
+    </div>
+
+    <div class="input-group">
+        <label>Pincode</label>
+        <input type="text" id="custPincode" required placeholder="6-digit Pincode">
+    </div>
+
+    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">Place Order</button>
+</form>
+
+<!-- SAFE JAVASCRIPT LOGIC -->
+<script>
+document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Step 1: Input Elements Ko Fetch Karein (Inki IDs HTML se exact match honi chahiye)
+    const nameEl = document.getElementById('custName');
+    const phoneEl = document.getElementById('custPhone');
+    const addressEl = document.getElementById('custAddress');
+    const pincodeEl = document.getElementById('custPincode');
+
+    // Step 2: Safe Value Extraction & Trimming
+    const name = nameEl && nameEl.value ? nameEl.value.trim() : '';
+    const phone = phoneEl && phoneEl.value ? phoneEl.value.trim() : '';
+    const address = addressEl && addressEl.value ? addressEl.value.trim() : '';
+    const pincode = pincodeEl && pincodeEl.value ? pincodeEl.value.trim() : '';
+
+    // Step 3: Validation Check
+    if (!name || !phone || !address || !pincode) {
+        alert('Kripya sabhi details sahi se bharein!');
+        return;
+    }
+
+    // Step 4: Order Data Object
+    const orderData = {
+        customerName: name,
+        phone: phone,
+        address: address,
+        pincode: pincode,
+        createdAt: new Date().toISOString()
+    };
+
+    console.log("Order Successful:", orderData);
+    alert("Aapka order successfully register ho gaya hai!");
+});
+</script>
