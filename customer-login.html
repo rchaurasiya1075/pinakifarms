@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Login - Pinaki Farms</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; font-family: Arial, sans-serif; background: linear-gradient(135deg, #173d20, #4f8a3b); }
+    .card { width: min(100%, 440px); padding: 36px; border-radius: 18px; background: #fff; box-shadow: 0 20px 55px rgba(0,0,0,.26); }
+    .brand { text-align: center; color: #245b2c; margin-bottom: 24px; }
+    .brand i { font-size: 42px; }
+    .brand h1 { margin: 10px 0 6px; font-size: 25px; }
+    .brand p { margin: 0; color: #667085; }
+    .form { display: none; }
+    .form.active { display: block; }
+    h2 { margin: 0 0 18px; color: #243026; font-size: 21px; }
+    label { display: block; margin: 14px 0 6px; color: #344054; font-size: 14px; font-weight: 600; }
+    input { width: 100%; padding: 12px 14px; border: 1px solid #d0d5dd; border-radius: 9px; font-size: 15px; }
+    input:focus { outline: 2px solid #a9d5a5; border-color: #2d7a35; }
+    button { width: 100%; margin-top: 20px; padding: 13px; border: 0; border-radius: 9px; background: #2d6a35; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+    button:hover { background: #214f28; }
+    .switch, .back { margin: 18px 0 0; text-align: center; color: #667085; font-size: 14px; }
+    a { color: #245b2c; font-weight: 700; text-decoration: none; }
+    #message { display: none; margin: 0 0 15px; padding: 11px 12px; border-radius: 8px; font-size: 14px; }
+    #message.error { display: block; background: #fef3f2; color: #b42318; }
+    #message.success { display: block; background: #ecfdf3; color: #027a48; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">
+      <i class="fas fa-leaf"></i>
+      <h1>Pinaki Farms</h1>
+      <p>Customer Account</p>
+    </div>
+    <div id="message" role="alert"></div>
+
+    <form id="loginForm" class="form active">
+      <h2>Customer Login</h2>
+      <label for="loginEmail">Email address</label>
+      <input id="loginEmail" type="email" autocomplete="email" required>
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" required>
+      <button type="submit">Login</button>
+      <p class="switch">New customer? <a href="#" id="showSignup">Create an account</a></p>
+    </form>
+
+    <form id="signupForm" class="form">
+      <h2>Create Customer Account</h2>
+      <label for="signupName">Full name</label>
+      <input id="signupName" type="text" autocomplete="name" required>
+      <label for="signupEmail">Email address</label>
+      <input id="signupEmail" type="email" autocomplete="email" required>
+      <label for="signupPhone">Phone number</label>
+      <input id="signupPhone" type="tel" autocomplete="tel">
+      <label for="signupPassword">Password</label>
+      <input id="signupPassword" type="password" autocomplete="new-password" minlength="6" required>
+      <button type="submit">Create Account</button>
+      <p class="switch">Already have an account? <a href="#" id="showLogin">Login</a></p>
+    </form>
+    <p class="back"><a href="index.html"><i class="fas fa-arrow-left"></i> Back to shop</a></p>
+  </main>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const message = document.getElementById('message');
+
+    function showMessage(text, type = 'error') {
+      message.textContent = text;
+      message.className = type;
+    }
+    function setForm(form) {
+      loginForm.classList.toggle('active', form === 'login');
+      signupForm.classList.toggle('active', form === 'signup');
+      message.style.display = 'none';
+    }
+    document.getElementById('showSignup').addEventListener('click', event => { event.preventDefault(); setForm('signup'); });
+    document.getElementById('showLogin').addEventListener('click', event => { event.preventDefault(); setForm('login'); });
+
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        await signInWithEmailAndPassword(auth, loginEmail.value.trim(), loginPassword.value);
+        showMessage('Login successful. Opening the shop...', 'success');
+        window.setTimeout(() => window.location.replace('index.html'), 600);
+      } catch (error) {
+        showMessage(error.code === 'auth/wrong-password' ? 'Incorrect password.' : 'Login failed. Please check your details.');
+      }
+    });
+
+    signupForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        const email = signupEmail.value.trim();
+        const credential = await createUserWithEmailAndPassword(auth, email, signupPassword.value);
+        await addDoc(collection(db, 'users'), {
+          uid: credential.user.uid,
+          name: signupName.value.trim(),
+          email,
+          phone: signupPhone.value.trim(),
+          role: 'customer',
+          createdAt: new Date().toISOString()
+        });
+        showMessage('Account created. Opening the shop...', 'success');
+        window.setTimeout(() => window.location.replace('index.html'), 600);
+      } catch (error) {
+        showMessage(error.code === 'auth/email-already-in-use' ? 'This email is already registered.' : 'Unable to create account. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
