@@ -24,7 +24,8 @@ let state = {
     currentUser: null,
     currentUserData: null,
     currentUserRole: 'customer',
-    currentFilter: 'all'
+    currentFilter: 'all',
+    activeCoupon: null
 };
 
 // ============= DOM REFS =============
@@ -329,7 +330,7 @@ function renderProducts() {
     
     productGrid.innerHTML = filtered.map(product => `
         <div class="product-card" onclick="openProductDetail('${product.id}')" style="cursor:pointer;">
-            <div class="product-image">${product.emoji || '🌿'}</div>
+            <div class="product-image ${product.images?.[0] ? '' : 'placeholder'}">${product.images?.[0] ? `<img src="${product.images[0]}" alt="${product.name}" loading="lazy">` : 'Product image coming soon'}</div>
             <div class="product-info">
                 <span class="purity-badge">${product.purity || 'Pure'}</span>
                 <h3>${product.name}</h3>
@@ -441,7 +442,7 @@ function updateCartUI() {
     
     cartItems.innerHTML = state.cart.map(item => `
         <div class="cart-item">
-            <div class="cart-item-image">${item.emoji || '🌿'}</div>
+            <div class="cart-item-image">${item.images?.[0] ? `<img src="${item.images[0]}" alt="${item.name}">` : ''}</div>
             <div class="cart-item-info">
                 <h4>${item.name}</h4>
                 <p>₹${item.price} × ${item.quantity} = ₹${item.price * item.quantity}</p>
@@ -457,7 +458,15 @@ function updateCartUI() {
         </div>
     `).join('');
     
-    const total = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discount = state.activeCoupon ? Math.round(subtotal * state.activeCoupon.percent / 100) : 0;
+    const total = Math.max(0, subtotal - discount);
+    const subtotalEl = document.getElementById('cartSubtotal');
+    const discountRow = document.getElementById('discountRow');
+    const discountEl = document.getElementById('cartDiscount');
+    if (subtotalEl) subtotalEl.textContent = `₹${subtotal}`;
+    if (discountRow) discountRow.hidden = !discount;
+    if (discountEl) discountEl.textContent = `−₹${discount}`;
     cartTotal.textContent = `₹${total}`;
 }
 
@@ -466,29 +475,39 @@ window.toggleCart = function() {
     cartOverlay.classList.toggle('active');
 }
 
-window.checkout = function() {
-    if (state.cart.length === 0) {
-        showToast('Cart is empty!');
-        return;
+window.applyCoupon = async function() {
+    const input = document.getElementById('couponCode');
+    const message = document.getElementById('couponMessage');
+    const code = input?.value.trim().toUpperCase();
+    if (!code) { showToast('Enter a coupon code'); return; }
+    try {
+        const snapshot = await getDocs(query(collection(db, 'coupons'), where('code', '==', code)));
+        const couponDoc = snapshot.docs[0];
+        if (!couponDoc) throw new Error('invalid');
+        const coupon = couponDoc.data();
+        const expired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
+        if (!coupon.active || expired || !coupon.percent || coupon.percent < 1 || coupon.percent > 100) throw new Error('invalid');
+        state.activeCoupon = { code: coupon.code, percent: Number(coupon.percent) };
+        message.textContent = `${coupon.percent}% discount applied: ${coupon.code}`;
+        updateCartUI();
+    } catch (error) {
+        state.activeCoupon = null;
+        if (message) message.textContent = 'This coupon is invalid or expired.';
+        updateCartUI();
     }
-    if (!state.currentUser) {
-        showToast('Please login first');
-        window.toggleAuth();
-        return;
-    }
-    
-    const message = state.cart.map(item => 
-        `${item.name} × ${item.quantity} = ₹${item.price * item.quantity}`
-    ).join('\n');
-    const total = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const whatsappUrl = `https://wa.me/919876543210?text=Order from ${state.currentUserData?.name || 'Customer'}:%0A${encodeURIComponent(message)}%0ATotal: ₹${total}`;
-    window.open(whatsappUrl, '_blank');
-    state.cart = [];
-    saveCartToLocal();
-    updateCartUI();
-    window.toggleCart();
-}
+};
 
+window.checkout = function() {
+    if (state.cart.length === 0) { showToast('Cart is empty!'); return; }
+    if (!state.currentUser) { showToast('Please login first'); window.toggleAuth(); return; }
+    const message = state.cart.map(item => `${item.name} × ${item.quantity} = ₹${item.price * item.quantity}`).join('\n');
+    const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discount = state.activeCoupon ? Math.round(subtotal * state.activeCoupon.percent / 100) : 0;
+    const total = subtotal - discount;
+    const couponLine = state.activeCoupon ? `%0ACoupon: ${state.activeCoupon.code} (${state.activeCoupon.percent}% off)%0ADiscount: ₹${discount}` : '';
+    const whatsappUrl = `https://wa.me/919876543210?text=Order from ${state.currentUserData?.name || 'Customer'}:%0A${encodeURIComponent(message)}%0ASubtotal: ₹${subtotal}${couponLine}%0ATotal: ₹${total}`;
+    window.open(whatsappUrl, '_blank');
+}
 function saveCartToLocal() {
     localStorage.setItem('pinaki_cart', JSON.stringify(state.cart));
 }
