@@ -642,12 +642,12 @@ async function loadCoupons() {
         }
         tbody.innerHTML = coupons.map(coupon => {
             const expired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
-            const available = coupon.active && !expired;
+            const available = coupon.active && !expired && !coupon.used;
             return `<tr>
                 <td><strong>${coupon.code}</strong></td>
                 <td>${coupon.percent}% off</td>
                 <td>${coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString('en-IN') : 'No expiry'}</td>
-                <td><span class="status-badge ${available ? 'status-shipped' : 'status-cancelled'}">${available ? 'Active' : (expired ? 'Expired' : 'Inactive')}</span></td>
+                <td><span class="status-badge ${available ? 'status-shipped' : 'status-cancelled'}">${available ? 'Active' : (coupon.used ? 'Used' : (expired ? 'Expired' : 'Inactive'))}</span></td>
                 <td>${coupon.createdAt ? new Date(coupon.createdAt).toLocaleDateString('en-IN') : '—'}</td>
                 <td><button class="admin-edit-btn" onclick="toggleCoupon('${coupon.id}', ${!coupon.active})">${coupon.active ? 'Disable' : 'Enable'}</button><button class="admin-delete-btn" onclick="deleteCoupon('${coupon.id}')"><i class="fas fa-trash"></i></button></td>
             </tr>`;
