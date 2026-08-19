@@ -1041,10 +1041,13 @@
         // BUY NOW
         // ============================================
         window.buyNow = function() {
-            addToCartDetail();
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 500);
+            if (!currentProduct) return;
+            let cart = JSON.parse(localStorage.getItem('pinaki_cart') || '[]');
+            const existing = cart.find(item => item.id === currentProduct.id);
+            if (existing) existing.quantity += quantity;
+            else cart.push({ ...currentProduct, quantity: quantity });
+            localStorage.setItem('pinaki_cart', JSON.stringify(cart));
+            window.location.href = 'checkout.html';
         };
 
         // ============================================
