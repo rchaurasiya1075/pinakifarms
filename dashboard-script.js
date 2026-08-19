@@ -157,7 +157,10 @@ function renderOrders() {
                     <td>${order.paymentMethod || 'N/A'}</td>
                     <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'Pending'}</span></td>
                     <td>
-                        <button onclick="viewOrderDetail('${order.id}')" class="view-btn">
+                        <a href="order-tracking.html?order=${encodeURIComponent(order.id)}" class="view-btn" title="Track order">
+                            <i class="fas fa-location-dot"></i> Track
+                        </a>
+                        <button onclick="viewOrderDetail('${order.id}')" class="view-btn" title="Order details">
                             <i class="fas fa-eye"></i>
                         </button>
                     </td>
@@ -244,6 +247,7 @@ window.viewOrderDetail = function(orderId) {
             <p><strong>Status:</strong> <span class="status-badge status-${order.status || 'pending'}">${order.status || 'Pending'}</span></p>
             <p><strong>Payment Method:</strong> ${order.paymentMethod || 'N/A'}</p>
             <p><strong>Total:</strong> ₹${order.total || 0}</p>
+            <p><strong>Tracking:</strong> <a href="order-tracking.html?order=${encodeURIComponent(order.id)}">Track this order</a></p>
             <hr>
             <h4>Items:</h4>
             <ul>
