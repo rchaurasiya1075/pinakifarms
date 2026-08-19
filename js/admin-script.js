@@ -658,9 +658,16 @@ async function loadCoupons() {
     }
 }
 
+window.generateCouponCode = function() {
+    const campaign = (document.getElementById('couponCampaign').value || 'OFFER')
+        .toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || 'OFFER';
+    const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+    document.getElementById('couponCodeAdmin').value = `${campaign}-${random}`;
+};
 window.openCouponModal = function() {
     document.getElementById('couponForm').reset();
     document.getElementById('couponActive').checked = true;
+    window.generateCouponCode();
     document.getElementById('couponModal').classList.add('active');
 };
 window.closeCouponModal = function() {
@@ -686,6 +693,8 @@ const couponForm = document.getElementById('couponForm');
 if (couponForm) {
     couponForm.addEventListener('submit', async event => {
         event.preventDefault();
+        const campaign = document.getElementById('couponCampaign').value.trim().toUpperCase();
+        window.generateCouponCode();
         const code = document.getElementById('couponCodeAdmin').value.trim().toUpperCase();
         const percent = Number(document.getElementById('couponPercent').value);
         const expiresAt = document.getElementById('couponExpiry').value;
@@ -698,7 +707,8 @@ if (couponForm) {
             const existing = await getDocs(query(collection(db, 'coupons'), where('code', '==', code)));
             if (!existing.empty) { showToast('That coupon code already exists.'); return; }
             await addDoc(collection(db, 'coupons'), {
-                code, percent, expiresAt: expiresAt || '', active,
+                code, campaign, percent, expiresAt: expiresAt || '', active,
+                oneTime: true, used: false, usedAt: '', usedBy: '',
                 createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
             });
             closeCouponModal();
