@@ -27,6 +27,14 @@
     #message { display: none; margin: 0 0 15px; padding: 11px 12px; border-radius: 8px; font-size: 14px; }
     #message.error { display: block; background: #fef3f2; color: #b42318; }
     #message.success { display: block; background: #ecfdf3; color: #027a48; }
+    .reset-modal { position: fixed; inset: 0; display: none; place-items: center; padding: 20px; background: rgba(0,0,0,.5); }
+    .reset-modal.open { display: grid; }
+    .reset-dialog { width: min(100%, 380px); padding: 26px; border-radius: 14px; background: #fff; }
+    .reset-dialog h2 { margin-bottom: 8px; }
+    .reset-dialog p { color: #667085; font-size: 14px; line-height: 1.45; }
+    .reset-dialog .actions { display: flex; gap: 10px; margin-top: 20px; }
+    .reset-dialog button { margin-top: 0; }
+    .reset-dialog .cancel { background: #667085; }
   </style>
 </head>
 <body>
@@ -64,6 +72,18 @@
     </form>
     <p class="back"><a href="index.html"><i class="fas fa-arrow-left"></i> Back to shop</a></p>
   </main>
+  <div class="reset-modal" id="resetModal" aria-hidden="true">
+    <form class="reset-dialog" id="resetForm">
+      <h2>Reset Password</h2>
+      <p>Enter your registered email address. We will send a password-reset link.</p>
+      <label for="resetEmail">Email address</label>
+      <input id="resetEmail" type="email" autocomplete="email" required>
+      <div class="actions">
+        <button type="button" class="cancel" id="closeReset">Cancel</button>
+        <button type="submit">Send reset link</button>
+      </div>
+    </form>
+  </div>
 
   <script type="module">
     import { auth, db } from './firebase-config.js';
@@ -85,19 +105,29 @@
     }
     document.getElementById('showSignup').addEventListener('click', event => { event.preventDefault(); setForm('signup'); });
     document.getElementById('showLogin').addEventListener('click', event => { event.preventDefault(); setForm('login'); });
-    document.getElementById('forgotPassword').addEventListener('click', async event => {
+    const resetModal = document.getElementById('resetModal');
+    const resetEmail = document.getElementById('resetEmail');
+    document.getElementById('forgotPassword').addEventListener('click', event => {
       event.preventDefault();
-      const email = loginEmail.value.trim();
-      if (!email) {
-        showMessage('Please enter your email address first.');
-        loginEmail.focus();
-        return;
-      }
+      resetEmail.value = loginEmail.value.trim();
+      resetModal.classList.add('open');
+      resetModal.setAttribute('aria-hidden', 'false');
+      resetEmail.focus();
+    });
+    document.getElementById('closeReset').addEventListener('click', () => {
+      resetModal.classList.remove('open');
+      resetModal.setAttribute('aria-hidden', 'true');
+    });
+    document.getElementById('resetForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const email = resetEmail.value.trim();
       try {
         await sendPasswordResetEmail(auth, email);
-        showMessage('Password-reset link sent. Please check your email inbox.', 'success');
+        resetModal.classList.remove('open');
+        resetModal.setAttribute('aria-hidden', 'true');
+        showMessage('If this email is registered, a password-reset link has been sent. Please check your inbox.', 'success');
       } catch (error) {
-        showMessage('Unable to send reset link. Please check the email address and try again.');
+        showMessage('Unable to send the reset link. Please check the email address and try again.');
       }
     });
 
