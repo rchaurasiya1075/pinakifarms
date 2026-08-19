@@ -127,6 +127,9 @@
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
                 <p class="back-link">
+                    <a href="#" id="forgotPassword">Forgot password?</a>
+                </p>
+                <p class="back-link">
                     <a href="../index.html"><i class="fas fa-arrow-left"></i> Back to Website</a>
                 </p>
             </form>
@@ -139,6 +142,7 @@
             signInWithEmailAndPassword, 
             onAuthStateChanged,
             signOut,
+            sendPasswordResetEmail,
             db,
             collection,
             query,
@@ -273,7 +277,25 @@
             }
         });
 
-        console.log('🔑 Use: admin@pinakifarms.com / Admin@123456');
+        document.getElementById('forgotPassword').addEventListener('click', async function(event) {
+            event.preventDefault();
+            const email = emailInput.value.trim();
+            if (email !== ADMIN_EMAIL) {
+                errorDiv.textContent = '❌ Enter the registered admin email first.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                successDiv.textContent = '✅ Password-reset link sent. Please check the admin email inbox.';
+                successDiv.style.display = 'block';
+            } catch (error) {
+                errorDiv.textContent = '❌ Unable to send reset link. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        console.log('Admin login ready.');
     </script>
 </body>
 </html>
