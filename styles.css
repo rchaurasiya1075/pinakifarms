@@ -1044,3 +1044,18 @@ footer {
         font-size: 18px;
     }
 }
+
+
+/* Desktop account, cart and coupon controls */
+.desktop-action-label { font-size: 13px; margin-left: 6px; }
+.header-actions button { display: inline-flex; align-items: center; }
+.coupon-box { margin: 14px 0; padding: 12px; background: #f7faf5; border: 1px dashed var(--gold); border-radius: 9px; }
+.coupon-box label { display: block; margin-bottom: 7px; color: var(--primary); font-size: 13px; font-weight: 700; }
+.coupon-row { display: flex; gap: 8px; }
+.coupon-row input { min-width: 0; flex: 1; padding: 9px 10px; border: 1px solid #d9dfd3; border-radius: 6px; text-transform: uppercase; }
+.coupon-row button { padding: 9px 13px; border: 0; border-radius: 6px; background: var(--primary); color: #fff; font-weight: 700; cursor: pointer; }
+#couponMessage { display: block; min-height: 16px; margin-top: 6px; color: var(--primary); }
+.discount-total { color: #19723a; }
+.product-image img, .cart-item-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.product-image.placeholder { font-size: 13px; color: var(--brown-light); text-align: center; padding: 20px; }
+@media (max-width: 768px) { .desktop-action-label { display: none; } }
