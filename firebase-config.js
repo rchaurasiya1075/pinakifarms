@@ -6,6 +6,7 @@ import {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
+    sendPasswordResetEmail,
     updatePassword,
     reauthenticateWithCredential,
     EmailAuthProvider
@@ -56,6 +57,7 @@ export {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
+    sendPasswordResetEmail,
     updatePassword,
     reauthenticateWithCredential,
     EmailAuthProvider
