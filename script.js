@@ -251,7 +251,7 @@ function updateUserUI() {
     const authBtn = document.querySelector('.auth-toggle');
     
     if (state.currentUser && state.currentUserData) {
-        authBtn.innerHTML = `<i class="fas fa-user-check"></i>`;
+        authBtn.innerHTML = `<i class="fas fa-user-check"></i><span class="desktop-action-label">Account</span>`;
         authBtn.title = state.currentUserData.name || 'User';
         
         let userDisplay = document.querySelector('.user-display');
@@ -265,12 +265,10 @@ function updateUserUI() {
         
         authBtn.onclick = function(e) {
             e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                window.logout();
-            }
+            window.location.href = 'dashboard.html';
         };
     } else {
-        authBtn.innerHTML = `<i class="fas fa-user"></i>`;
+        authBtn.innerHTML = `<i class="fas fa-user"></i><span class="desktop-action-label">Account</span>`;
         authBtn.title = 'Login / Signup';
         authBtn.onclick = window.toggleAuth;
         
