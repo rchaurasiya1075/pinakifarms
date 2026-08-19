@@ -102,7 +102,13 @@
 
                     <!-- Change Password Section -->
                     <div class="change-password-section">
-                        <h3><i class="fas fa-lock"></i> Change Password</h3>
+                        <h3><i class="fas fa-lock"></i> Password & Security</h3>
+                        <p style="margin:0 0 16px;color:#667085;">Forgot your current password? We will send a secure reset link to your registered email.</p>
+                        <button type="button" class="reset-btn" onclick="sendProfileResetLink()">
+                            <i class="fas fa-envelope"></i> Send Password Reset Link
+                        </button>
+                        <hr style="margin:24px 0;border:0;border-top:1px solid #e5e7eb;">
+                        <h3 style="font-size:18px;">Update Password</h3>
                         <form id="passwordForm" onsubmit="changePassword(event)">
                             <div class="form-group">
                                 <label>Current Password</label>
