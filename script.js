@@ -5,7 +5,7 @@ import {
 
 // Import Firestore functions directly from CDN
 import { 
-    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot, getDoc
+    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot, getDoc, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import { 
@@ -486,8 +486,8 @@ window.applyCoupon = async function() {
         if (!couponDoc) throw new Error('invalid');
         const coupon = couponDoc.data();
         const expired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
-        if (!coupon.active || expired || !coupon.percent || coupon.percent < 1 || coupon.percent > 100) throw new Error('invalid');
-        state.activeCoupon = { code: coupon.code, percent: Number(coupon.percent) };
+        if (!coupon.active || coupon.used || expired || !coupon.percent || coupon.percent < 1 || coupon.percent > 100) throw new Error('invalid');
+        state.activeCoupon = { id: couponDoc.id, code: coupon.code, percent: Number(coupon.percent) };
         message.textContent = `${coupon.percent}% discount applied: ${coupon.code}`;
         updateCartUI();
     } catch (error) {
@@ -497,16 +497,42 @@ window.applyCoupon = async function() {
     }
 };
 
-window.checkout = function() {
+window.checkout = async function() {
     if (state.cart.length === 0) { showToast('Cart is empty!'); return; }
     if (!state.currentUser) { showToast('Please login first'); window.toggleAuth(); return; }
     const message = state.cart.map(item => `${item.name} × ${item.quantity} = ₹${item.price * item.quantity}`).join('\n');
     const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discount = state.activeCoupon ? Math.round(subtotal * state.activeCoupon.percent / 100) : 0;
+    let couponLine = '';
+    let discount = 0;
+
+    if (state.activeCoupon) {
+        try {
+            await runTransaction(db, async transaction => {
+                const couponRef = doc(db, 'coupons', state.activeCoupon.id);
+                const snapshot = await transaction.get(couponRef);
+                if (!snapshot.exists()) throw new Error('Coupon not found');
+                const coupon = snapshot.data();
+                const expired = coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
+                if (!coupon.active || coupon.used || expired) throw new Error('Coupon already used');
+                discount = Math.round(subtotal * Number(coupon.percent) / 100);
+                transaction.update(couponRef, {
+                    used: true, active: false, usedAt: new Date().toISOString(),
+                    usedBy: state.currentUser.uid, updatedAt: new Date().toISOString()
+                });
+            });
+            couponLine = `%0ACoupon: ${state.activeCoupon.code} (${state.activeCoupon.percent}% off)%0ADiscount: ₹${discount}`;
+        } catch (error) {
+            state.activeCoupon = null;
+            updateCartUI();
+            showToast('Coupon is no longer available. Remove it and try again.');
+            return;
+        }
+    }
     const total = subtotal - discount;
-    const couponLine = state.activeCoupon ? `%0ACoupon: ${state.activeCoupon.code} (${state.activeCoupon.percent}% off)%0ADiscount: ₹${discount}` : '';
     const whatsappUrl = `https://wa.me/919876543210?text=Order from ${state.currentUserData?.name || 'Customer'}:%0A${encodeURIComponent(message)}%0ASubtotal: ₹${subtotal}${couponLine}%0ATotal: ₹${total}`;
     window.open(whatsappUrl, '_blank');
+    state.activeCoupon = null;
+    updateCartUI();
 }
 function saveCartToLocal() {
     localStorage.setItem('pinaki_cart', JSON.stringify(state.cart));
