@@ -54,14 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Toggle Auth Modal - GLOBAL
 window.toggleAuth = function() {
-    console.log('🔑 Toggle auth called');
-    if (authModal) {
-        authModal.classList.toggle('active');
-        document.body.style.overflow = authModal.classList.contains('active') ? 'hidden' : 'auto';
-        console.log('Auth modal active:', authModal.classList.contains('active'));
-    } else {
-        console.error('❌ Auth modal not found!');
-    }
+    window.location.href = 'customer-login.html';
 }
 
 // Close Auth Modal - GLOBAL
