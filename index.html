@@ -41,12 +41,8 @@
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount">0</span>
                 </button>
-                <button class="auth-toggle" onclick="toggleAuth()">
+                <button class="auth-toggle" onclick="window.location.href='customer-login.html'" title="Customer Login">
                     <i class="fas fa-user"></i>
-                </button>
-                <!-- ✅ Admin Link - Sahi Path -->
-                <button class="admin-link" onclick="window.location.href='admin/login.html'" title="Admin Panel">
-                    <i class="fas fa-user-shield"></i>
                 </button>
             </div>
         </div>
@@ -229,7 +225,6 @@
                     <a href="#home">Home</a>
                     <a href="#products">Products</a>
                     <a href="#story">Our Story</a>
-                    <a href="admin/login.html">Admin Panel</a>
                 </div>
                 <div class="footer-section">
                     <h4>Follow Us</h4>
@@ -251,9 +246,6 @@
         <button onclick="scrollToSection('home')"><i class="fas fa-home"></i><span>Home</span></button>
         <button onclick="scrollToSection('products')"><i class="fas fa-store"></i><span>Shop</span></button>
         <button onclick="toggleCart()"><i class="fas fa-shopping-cart"></i><span>Cart</span></button>
-        <button onclick="window.location.href='admin/login.html'">
-            <i class="fas fa-user-shield"></i><span>Admin</span>
-        </button>
         <button onclick="window.location.href='dashboard.html'">
             <i class="fas fa-user"></i><span>Account</span>
         </button>
