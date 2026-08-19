@@ -45,6 +45,7 @@
       <label for="loginPassword">Password</label>
       <input id="loginPassword" type="password" autocomplete="current-password" required>
       <button type="submit">Login</button>
+      <p class="switch"><a href="#" id="forgotPassword">Forgot password?</a></p>
       <p class="switch">New customer? <a href="#" id="showSignup">Create an account</a></p>
     </form>
 
@@ -66,7 +67,7 @@
 
   <script type="module">
     import { auth, db } from './firebase-config.js';
-    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
     const loginForm = document.getElementById('loginForm');
@@ -84,6 +85,21 @@
     }
     document.getElementById('showSignup').addEventListener('click', event => { event.preventDefault(); setForm('signup'); });
     document.getElementById('showLogin').addEventListener('click', event => { event.preventDefault(); setForm('login'); });
+    document.getElementById('forgotPassword').addEventListener('click', async event => {
+      event.preventDefault();
+      const email = loginEmail.value.trim();
+      if (!email) {
+        showMessage('Please enter your email address first.');
+        loginEmail.focus();
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMessage('Password-reset link sent. Please check your email inbox.', 'success');
+      } catch (error) {
+        showMessage('Unable to send reset link. Please check the email address and try again.');
+      }
+    });
 
     loginForm.addEventListener('submit', async event => {
       event.preventDefault();
